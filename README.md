@@ -2,11 +2,6 @@
 Ya Another Repository con un bellissimo YaFilter tutto da provare
 
 
-# YaFilter
-
-Yet Another Filter Search! Esatto! Un altro ancora!
-
-
 In questo documento sintetico si vuole descrivere l'utilizzo di un pojo java finalizzato alla composizione dinamica di query HQL hibernate (usando i Criteria), senza però usare una riga di codice di hibernate.
 
 L'obiettivo del pojo e' raccogliere le clausole definite al suo interno, serializzare in modo comodo i risultati di clausola, e infine far generare al repository la Query hibernate rispettando al meglio la sintassi HQL, da immettere nell'entitymanager.
