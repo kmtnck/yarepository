@@ -111,15 +111,18 @@ clausola di negazione
 # Compilazione progetto
 eseguire
 
+```
   mvn clean install
-  
+```
   Repository nexus http://alessandromodica.com:8081/nexus/repository/maven-releases/
   
- <dependency>
+```
+<dependency>
   <groupId>it.alessandromodica.open</groupId>
   <artifactId>yarepository</artifactId>
   <version>1.0.0</version>
-</dependency>
+ </dependency>
+```
 
 # Utilizzo
 
