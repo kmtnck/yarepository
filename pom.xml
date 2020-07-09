@@ -4,7 +4,7 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>it.alessandromodica.open</groupId>
 	<artifactId>yarepository</artifactId>
-	<version>1.0.0</version>
+	<version>1.0.1-SNAPSHOT</version>
 	<name>Ya Another Repository</name>
 	<description>Un bellissimo repository con uno strabiliante filtersearch tutto da provare</description>
 	<packaging>jar</packaging>
