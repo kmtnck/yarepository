@@ -112,7 +112,15 @@ clausola di negazione
 eseguire
 
   mvn clean install
- 
+  
+  Repository nexus http://alessandromodica.com:8081/nexus/repository/maven-releases/
+  
+ <dependency>
+  <groupId>it.alessandromodica.open</groupId>
+  <artifactId>yarepository</artifactId>
+  <version>1.0.0</version>
+</dependency>
+
 # Utilizzo
 
 Importare in un progetto JPA compliance la libreria yarepository e iniettare in Autowired il repository con le interfacce per leggere IQueries e per scrivere ICommand
