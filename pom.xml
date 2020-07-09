@@ -19,7 +19,7 @@
 		<buildDate>${maven.build.timestamp}</buildDate>
 		<!-- all library versions go here -->
 		<javaee.version>5</javaee.version>
-		<log4j.version>2.13.0</log4j.version>
+		<log4j.version>[2.13.2,)</log4j.version>
 		<bouncycastle.version>1.56</bouncycastle.version>
 		<javax.mail.version>1.4.3</javax.mail.version>
 		<javax.activation.version>1.1.1</javax.activation.version>
