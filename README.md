@@ -107,3 +107,14 @@ clausola in
 clausola notIn
 
 clausola di negazione
+
+# Compilazione progetto
+eseguire
+
+  mvn clean install
+ 
+# Utilizzo
+
+Importare in un progetto JPA compliance la libreria yarepository e iniettare in Autowired il repository con le interfacce per leggere IQueries e per scrivere ICommand
+
+Presto una guida piu approfondita 
