@@ -121,7 +121,7 @@ eseguire
   <groupId>it.alessandromodica.open</groupId>
   <artifactId>yarepository</artifactId>
   <version>1.0.0</version>
- </dependency>
+</dependency>
 ```
 
 # Utilizzo
