@@ -189,12 +189,13 @@
 		</dependency>
 		<!-- fine parte backend -->
 
-		<!-- driver accesso database -->
+		<!-- driver accesso database commentato da git. questo connector soffre di un bug di vulnerabilita -->
 		<dependency>
 			<groupId>mysql</groupId>
 			<artifactId>mysql-connector-java</artifactId>
 			<version>5.1.33</version>
 		</dependency>
+		-->
 	</dependencies>
 
 	<reporting>
