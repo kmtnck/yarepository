@@ -4,11 +4,16 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>it.alessandromodica.open</groupId>
 	<artifactId>yarepository</artifactId>
-	<version>1.0.1-SNAPSHOT</version>
+	<version>1.0.2-SNAPSHOT</version>
 	<name>Ya Another Repository</name>
 	<description>Un bellissimo repository con uno strabiliante filtersearch tutto da provare</description>
 	<packaging>jar</packaging>
 	<url>https://github.com/kmtnck/yarepository</url>
+
+	<scm>
+		<connection>scm:git:https://github.com/kmtnck/yarepository.git</connection>
+		<developerConnection>scm:git:https://github.com/kmtnck/yarepository.git</developerConnection>
+	</scm>
 
 	<distributionManagement>
 		<repository>
@@ -200,13 +205,9 @@
 		</dependency>
 		<!-- fine parte backend -->
 
-		<!-- driver accesso database commentato da git. questo connector soffre di un bug di vulnerabilita 
-		<dependency>
-			<groupId>mysql</groupId>
-			<artifactId>mysql-connector-java</artifactId>
-			<version>5.1.33</version>
-		</dependency>
-		-->
+		<!-- driver accesso database commentato da git. questo connector soffre 
+			di un bug di vulnerabilita <dependency> <groupId>mysql</groupId> <artifactId>mysql-connector-java</artifactId> 
+			<version>5.1.33</version> </dependency> -->
 	</dependencies>
 
 	<reporting>
@@ -234,7 +235,7 @@
 					<skip>true</skip>
 				</configuration>
 			</plugin>
- 			<plugin>
+			<plugin>
 				<groupId>org.sonatype.plugins</groupId>
 				<artifactId>nexus-staging-maven-plugin</artifactId>
 				<version>1.5.1</version>
@@ -316,7 +317,36 @@
 					</archive>
 				</configuration>
 			</plugin>
-
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-scm-plugin</artifactId>
+				<dependencies>
+					<dependency>
+						<groupId>org.codehaus.plexus</groupId>
+						<artifactId>plexus-utils</artifactId>
+						<version>2.1</version>
+					</dependency>
+					<dependency>
+						<groupId>org.apache.maven.scm</groupId>
+						<artifactId>maven-scm-provider-gitexe</artifactId>
+						<version>1.2</version>
+					</dependency>
+				</dependencies>
+				<version>1.0</version>
+				<configuration>
+					<tag>${project.version}</tag>
+					<connectionType>connection</connectionType>
+				</configuration>
+				<executions>
+					<execution>
+						<id>tag</id>
+						<phase>deploy</phase>
+						<goals>
+							<goal>tag</goal>
+						</goals>
+					</execution>
+				</executions>
+			</plugin>
 		</plugins>
 	</build>
 </project>
