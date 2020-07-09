@@ -12,7 +12,7 @@ import it.alessandromodica.product.persistence.exceptions.RepositoryException;
 
 /**
  * Classe base del searcher usato per eseguire ricerche tramite lo strumento
- * BOSearcher. I criteri di ricerca sono opportunamente serializzati affinchè
+ * BOSearcher. I criteri di ricerca sono opportunamente serializzati affinche'
  * siano convertiti in automatico in query HQL riconosciute da hibernate
  * 
  * @author Alessandro

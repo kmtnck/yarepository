@@ -3,7 +3,7 @@ package it.alessandromodica.product.persistence.repo;
 import org.apache.log4j.Logger;
 
 /**
- * In questa classe repository è possibile definire tutti i metodi legacy
+ * In questa classe repository e' possibile definire tutti i metodi legacy
  * necessari ad accedere a sql puro
  * 
  * E' la classe repository dedicata al software che si vuole realizzare e

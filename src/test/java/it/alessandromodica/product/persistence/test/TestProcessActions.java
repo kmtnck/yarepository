@@ -133,7 +133,7 @@ public class TestProcessActions extends TestCase {
 					.search(criteria.getSerialized());
 
 			if (fromDb.isEmpty())
-				Assert.assertTrue("I dati non sono stati trovati, ma la query è stata eseguita correttamente", true);
+				Assert.assertTrue("I dati non sono stati trovati, ma la query e' stata eseguita correttamente", true);
 			else {
 				for (GestioneUtenti pluginCommonLogaccesso : fromDb) {
 
@@ -159,7 +159,7 @@ public class TestProcessActions extends TestCase {
 					.search(criteria.getSerialized());
 
 			if (fromDb.isEmpty())
-				Assert.assertTrue("I dati non ci sono , ma la query è stata eseguita correttamente", true);
+				Assert.assertTrue("I dati non ci sono , ma la query e' stata eseguita correttamente", true);
 			else {
 				for (GestioneUtenti pluginCommonLogaccesso : fromDb) {
 

@@ -2,7 +2,7 @@ package it.alessandromodica.product.persistence.searcher;
 
 /**
  * Classe che rappresenta il criterio di ricerca di tipo like in un canonico
- * database Permette di definire se il like è di tipo unsensitive, se supportato
+ * database Permette di definire se il like e' di tipo unsensitive, se supportato
  * dal database
  * 
  * @author Alessandro
