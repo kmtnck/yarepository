@@ -17,7 +17,6 @@
 		<connection>scm:git:https://github.com/kmtnck/yarepository.git</connection>
 		<developerConnection>scm:git:https://github.com/kmtnck/yarepository.git</developerConnection>
 		<url>https://github.com/kmtnck/yarepository.git</url>
-		<tag>HEAD</tag>
 	</scm>
 
 	<properties>
