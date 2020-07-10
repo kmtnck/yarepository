@@ -1,7 +1,7 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 	<artifactId>yarepository</artifactId>
-	<version>1.0.35-SNAPSHOT</version>
+	<version>1.0.36-SNAPSHOT</version>
 	<name>Ya Another Repository</name>
 	<description>Un bellissimo repository con uno strabiliante filtersearch tutto da provare</description>
 	<packaging>jar</packaging>
