@@ -367,11 +367,6 @@ public class BaseRepository<T, JOIN> implements IRepositoryQueries<T, JOIN>, IRe
 
 	}
 
-	/**
-	 * @param root
-	 * @param fieldHB
-	 * @return
-	 */
 	private Path<Object> setFieldRoot(Root<T> root, String field) {
 
 		String[] splitField = field.split("\\.");
@@ -445,12 +440,6 @@ public class BaseRepository<T, JOIN> implements IRepositoryQueries<T, JOIN>, IRe
 		}
 	}
 
-	/**
-	 * Il criterio order è una specializzazione del tipo Criterion, il quale ha
-	 * però lo scopo di istruire hibernate a costruire la query definendo un
-	 * criterio di ordinamento su un campo (nome field, no nome campo su db) asc o
-	 * desc
-	 */
 	public List<T> getAll(Order orderby) throws RepositoryException {
 
 		try {
