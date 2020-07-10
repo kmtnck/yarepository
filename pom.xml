@@ -2,7 +2,6 @@
 	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 	<modelVersion>4.0.0</modelVersion>
-	<groupId>it.alessandromodica.open</groupId>
 	<artifactId>yarepository</artifactId>
 	<version>1.0.2-SNAPSHOT</version>
 	<name>Ya Another Repository</name>
@@ -10,52 +9,16 @@
 	<packaging>jar</packaging>
 	<url>https://github.com/kmtnck/yarepository</url>
 
-	<scm>
-		<connection>scm:git:https://github.com/kmtnck/yarepository.git</connection>
-		<developerConnection>scm:git:https://github.com/kmtnck/yarepository.git</developerConnection>
-	</scm>
-
-	<distributionManagement>
-		<repository>
-			<id>yanexus</id>
-			<url>http://alessandromodica.com:8081/nexus/repository/maven-releases</url>
-		</repository>
-		<snapshotRepository>
-			<id>yanexus</id>
-			<url>http://alessandromodica.com:8081/nexus/repository/maven-snapshots</url>
-		</snapshotRepository>
-	</distributionManagement>
+	<parent>
+		<groupId>it.alessandromodica.open</groupId>
+		<artifactId>api.base</artifactId>
+		<version>1.0.0-SNAPSHOT</version>
+	</parent>
 
 	<properties>
-		<!-- <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding> -->
-		<maven.compiler.source>1.8</maven.compiler.source>
-		<maven.compiler.target>1.8</maven.compiler.target>
-		<maven.toolchains.sdk>1.8</maven.toolchains.sdk>
-		<maven.build.timestamp.format>yyyy.MM.dd.HHmm</maven.build.timestamp.format>
-		<buildDate>${maven.build.timestamp}</buildDate>
-		<!-- all library versions go here -->
-		<javaee.version>5</javaee.version>
-		<log4j.version>[2.13.2,)</log4j.version>
-		<bouncycastle.version>1.56</bouncycastle.version>
-		<javax.mail.version>1.4.3</javax.mail.version>
-		<javax.activation.version>1.1.1</javax.activation.version>
-		<beanutils.version>1.6.1</beanutils.version>
-		<digester.version>1.5</digester.version>
-		<httpclient.version>3.1</httpclient.version>
-		<itextpdf.version>5.4.5</itextpdf.version>
-		<nscommon.version>1.5.0</nscommon.version>
-		<tomcat.version>5.0.28</tomcat.version>
-		<hsqldb.version>2.5.0</hsqldb.version>
-		<!-- Spring -->
-		<spring-framework.version>5.2.6.RELEASE</spring-framework.version>
-		<!-- Hibernate / JPA -->
-		<!-- <hibernate.version>4.3.5.Final</hibernate.version> -->
-		<hibernate.version>5.3.7.Final</hibernate.version>
-		<!-- Logging -->
-		<logback.version>1.0.13</logback.version>
-		<slf4j.version>1.7.5</slf4j.version>
 		<resteasy.version>3.12.0.Final</resteasy.version>
-		<jackson.version>[2.11.0]</jackson.version>
+		<hsqldb.version>2.5.0</hsqldb.version>
+		<tomcat.version>5.0.28</tomcat.version>
 		<webappname>appdeployata</webappname>
 		<uri.deploytomcat>http://alessandromodica.com:8080/manager/text</uri.deploytomcat>
 	</properties>
@@ -205,9 +168,13 @@
 		</dependency>
 		<!-- fine parte backend -->
 
-		<!-- driver accesso database commentato da git. questo connector soffre 
-			di un bug di vulnerabilita <dependency> <groupId>mysql</groupId> <artifactId>mysql-connector-java</artifactId> 
-			<version>5.1.33</version> </dependency> -->
+		<!-- driver accesso database commentato da git. questo connector soffre di un bug di vulnerabilita 
+		<dependency>
+			<groupId>mysql</groupId>
+			<artifactId>mysql-connector-java</artifactId>
+			<version>5.1.33</version>
+		</dependency>
+		-->
 	</dependencies>
 
 	<reporting>
@@ -224,129 +191,4 @@
 		</plugins>
 	</reporting>
 
-	<build>
-		<plugins>
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-deploy-plugin</artifactId>
-				<version>2.8.2</version>
-				<configuration>
-					<serverId>yanexus</serverId>
-					<skip>true</skip>
-				</configuration>
-			</plugin>
-			<plugin>
-				<groupId>org.sonatype.plugins</groupId>
-				<artifactId>nexus-staging-maven-plugin</artifactId>
-				<version>1.5.1</version>
-				<executions>
-					<execution>
-						<id>default-deploy</id>
-						<phase>deploy</phase>
-						<goals>
-							<goal>deploy</goal>
-						</goals>
-					</execution>
-				</executions>
-				<configuration>
-					<serverId>yanexus</serverId>
-					<nexusUrl>https://alessandromodica.com:8081/nexus</nexusUrl>
-					<skipStaging>true</skipStaging>
-				</configuration>
-			</plugin>
-			<!-- <plugin> <groupId>org.apache.maven.plugins</groupId> <artifactId>maven-toolchains-plugin</artifactId> 
-				<version>1.1</version> <executions> <execution> <goals> <goal>toolchain</goal> 
-				</goals> </execution> </executions> <configuration> <toolchains> <jdk> <version>${maven.toolchains.sdk}</version> 
-				<vendor>oracle</vendor> </jdk> </toolchains> </configuration> </plugin> -->
-
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-javadoc-plugin</artifactId>
-				<version>3.1.1</version>
-				<configuration>
-					<show>private</show>
-					<nohelp>true</nohelp>
-				</configuration>
-			</plugin>
-
-
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-site-plugin</artifactId>
-				<version>3.7.1</version>
-			</plugin>
-
-			<!-- <plugin> <groupId>org.apache.maven.plugins</groupId> <artifactId>maven-project-info-reports-plugin</artifactId> 
-				<version>3.0.0</version> </plugin> -->
-
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-compiler-plugin</artifactId>
-				<version>3.7.0</version>
-				<configuration>
-					<source>${maven.compiler.source}</source>
-					<target>${maven.compiler.target}</target>
-				</configuration>
-			</plugin>
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-surefire-plugin</artifactId>
-				<version>2.18.1</version>
-				<configuration>
-					<skipTests>false</skipTests>
-				</configuration>
-			</plugin>
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-jar-plugin</artifactId>
-				<version>3.0.2</version>
-				<configuration>
-					<archive>
-						<addMavenDescriptor>true</addMavenDescriptor>
-						<manifestSections>
-							<manifestSection>
-								<name>${project.artifactId}</name>
-								<manifestEntries>
-									<Implementation-Title>${project.name}</Implementation-Title>
-									<Implementation-Vendor>${project.groupId}</Implementation-Vendor>
-									<Implementation-Version>${project.version}</Implementation-Version>
-									<Implementation-Date>${buildDate}</Implementation-Date>
-								</manifestEntries>
-							</manifestSection>
-						</manifestSections>
-					</archive>
-				</configuration>
-			</plugin>
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-scm-plugin</artifactId>
-				<dependencies>
-					<dependency>
-						<groupId>org.codehaus.plexus</groupId>
-						<artifactId>plexus-utils</artifactId>
-						<version>2.1</version>
-					</dependency>
-					<dependency>
-						<groupId>org.apache.maven.scm</groupId>
-						<artifactId>maven-scm-provider-gitexe</artifactId>
-						<version>1.2</version>
-					</dependency>
-				</dependencies>
-				<version>1.0</version>
-				<configuration>
-					<tag>${project.version}</tag>
-					<connectionType>connection</connectionType>
-				</configuration>
-				<executions>
-					<execution>
-						<id>tag</id>
-						<phase>deploy</phase>
-						<goals>
-							<goal>tag</goal>
-						</goals>
-					</execution>
-				</executions>
-			</plugin>
-		</plugins>
-	</build>
 </project>
