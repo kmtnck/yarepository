@@ -1,4 +1,6 @@
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 	<artifactId>yarepository</artifactId>
 	<version>1.0.40-SNAPSHOT</version>
@@ -13,12 +15,17 @@
 		<version>1.0.5</version>
 	</parent>
 
-<!-- 	<scm>
+	<!-- certificato comportamento in cui se scm parametrizzato a parent si 
+		ha il seguente errore: [ERROR] fatal: repository 'https://github.com/kmtnck/yarepository.git/yarepository/' 
+		not found la composizione e' chiaramente errata e, per risolvere, si imposta 
+		in override l'uri completo 
+	-->
+	<scm>
 		<connection>scm:git:https://github.com/kmtnck/yarepository.git</connection>
 		<developerConnection>scm:git:https://github.com/kmtnck/yarepository.git</developerConnection>
 		<url>https://github.com/kmtnck/yarepository.git</url>
 		<tag>v@{project.version}.${buildDate}</tag>
-	</scm> -->
+	</scm>
 
 	<properties>
 		<resteasy.version>3.12.0.Final</resteasy.version>
