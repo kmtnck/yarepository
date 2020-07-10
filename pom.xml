@@ -199,18 +199,8 @@
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-release-plugin</artifactId>
-				<dependencies>
-					<dependency>
-						<groupId>org.apache.maven.scm</groupId>
-						<artifactId>maven-scm-provider-jgit</artifactId>
-						<version>1.11.2</version>
-					</dependency>
-				</dependencies>
 				<configuration>
 					<tagNameFormat>v@{project.version}.${buildDate}</tagNameFormat>
-					<providerImplementations>
-						<git>jgit</git>
-					</providerImplementations>
 				</configuration>
 			</plugin>
 
