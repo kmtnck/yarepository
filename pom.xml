@@ -1,7 +1,9 @@
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 	<artifactId>yarepository</artifactId>
-	<version>1.0.23-SNAPSHOT</version>
+	<version>1.0.24-SNAPSHOT</version>
 	<name>Ya Another Repository</name>
 	<description>Un bellissimo repository con uno strabiliante filtersearch tutto da provare</description>
 	<packaging>jar</packaging>
@@ -17,6 +19,7 @@
 		<connection>scm:git:https://github.com/kmtnck/yarepository.git</connection>
 		<developerConnection>scm:git:https://github.com/kmtnck/yarepository.git</developerConnection>
 		<url>https://github.com/kmtnck/yarepository.git</url>
+		<tag>HEAD</tag>
 	</scm>
 
 	<properties>
@@ -195,11 +198,19 @@
 		<plugins>
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-release-plugin</artifactId>
+				<version>3.0.0-M2</version>
+				<configuration>
+					<tagNameFormat>v${buildDate}@{project.version}</tagNameFormat>
+				</configuration>
+			</plugin>
+
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-surefire-plugin</artifactId>
 				<version>2.18.1</version>
 				<configuration>
 					<skipTests>true</skipTests>
-					<tagNameFormat>v${buildDate}@{project.version}</tagNameFormat>
 				</configuration>
 			</plugin>
 		</plugins>
