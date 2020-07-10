@@ -10,7 +10,7 @@
 	<parent>
 		<groupId>it.alessandromodica.open</groupId>
 		<artifactId>api.base</artifactId>
-		<version>1.0.2</version>
+		<version>1.0.3</version>
 	</parent>
 
 	<scm>
@@ -194,15 +194,6 @@
 
 	<build>
 		<plugins>
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-release-plugin</artifactId>
-				<version>2.5.2</version>
-				<configuration>
-					<tagNameFormat>v@{project.version}.${buildDate}</tagNameFormat>
-				</configuration>
-			</plugin>
-
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-surefire-plugin</artifactId>
