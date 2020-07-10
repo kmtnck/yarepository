@@ -186,7 +186,7 @@
 			</plugin>
 		</plugins>
 	</reporting>
-	
+
 	<build>
 		<plugins>
 			<plugin>
@@ -197,6 +197,16 @@
 					<skipTests>true</skipTests>
 				</configuration>
 			</plugin>
+			
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-release-plugin</artifactId>
+				<configuration>
+					<tagNameFormat>v@{project.version}</tagNameFormat>
+					<releaseProfiles>release</releaseProfiles>
+				</configuration>
+			</plugin>
+			
 		</plugins>
 	</build>
 </project>
