@@ -10,15 +10,15 @@
 	<parent>
 		<groupId>it.alessandromodica.open</groupId>
 		<artifactId>api.base</artifactId>
-		<version>1.0.3</version>
+		<version>1.0.4</version>
 	</parent>
 
-	<scm>
+<!-- 	<scm>
 		<connection>scm:git:https://github.com/kmtnck/yarepository.git</connection>
 		<developerConnection>scm:git:https://github.com/kmtnck/yarepository.git</developerConnection>
 		<url>https://github.com/kmtnck/yarepository.git</url>
 		<tag>v@{project.version}.${buildDate}</tag>
-	</scm>
+	</scm> -->
 
 	<properties>
 		<resteasy.version>3.12.0.Final</resteasy.version>
