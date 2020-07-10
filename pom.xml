@@ -10,9 +10,9 @@
 	<url>https://github.com/kmtnck/yarepository</url>
 
 	<scm>
-		<connection>scm:git:https://github.com/kmtnck/${project.artifactId}.git</connection>
-		<developerConnection>scm:git:https://github.com/kmtnck/${project.artifactId}.git</developerConnection>
-		<url>https://github.com/kmtnck/${project.artifactId}.git</url>
+		<connection>scm:git:https://github.com/kmtnck/yarepository.git</connection>
+		<developerConnection>scm:git:https://github.com/kmtnck/yarepository.git</developerConnection>
+		<url>https://github.com/kmtnck/yarepository.git</url>
 	</scm>
 
 	<parent>
