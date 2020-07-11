@@ -355,7 +355,7 @@ public class BaseRepository<T, JOIN> implements IRepositoryQueries<T, JOIN>, IRe
 			List<Predicate> notpred = new ArrayList<Predicate>(0);
 			if (predicates.size() > 0) {
 				Predicate concatPredicate = null;
-				for (Predicate predicate : orPredicates) {
+				for (Predicate predicate : predicates) {
 					concatPredicate = builder.and(predicate);
 				}
 				Predicate not = builder.not(concatPredicate);
