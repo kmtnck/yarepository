@@ -120,7 +120,7 @@ eseguire
 <dependency>
   <groupId>it.alessandromodica.open</groupId>
   <artifactId>yarepository</artifactId>
-  <version>1.0.40</version>
+  <version>1.1.0</version>
 </dependency>
 ```
 
