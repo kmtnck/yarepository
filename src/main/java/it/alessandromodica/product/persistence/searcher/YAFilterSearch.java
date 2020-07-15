@@ -91,6 +91,13 @@ public abstract class YAFilterSearch extends YAFilterBase implements Serializabl
 		this.classEntity = classEntity;
 	}
 
+	public static YAFilterSerializeCriteria getEmptyFilter(Class<?> classEntity)
+	{
+		YAFilterSerializeCriteria empty = new YAFilterSerializeCriteria();
+		empty.setClassEntity(classEntity);
+		return empty;
+	}
+	
 	public static void setClauseInList(String nameField, Object[] data, YAFilterSearch searcher) {
 		if (data != null && data.length > 0)
 			searcher.getListIn().put(nameField, data);
