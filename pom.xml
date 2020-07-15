@@ -21,6 +21,13 @@
 
 	<dependencies>
 
+		<dependency>
+			<groupId>junit</groupId>
+			<artifactId>junit</artifactId>
+			<version>4.13</version>
+			<scope>test</scope>
+		</dependency>
+
 		<!-- https://mvnrepository.com/artifact/org.apache.logging.log4j/log4j-core -->
 		<dependency>
 			<groupId>org.apache.logging.log4j</groupId>
@@ -28,31 +35,66 @@
 			<version>${log4j.version}</version>
 		</dependency>
 
-		<!-- https://mvnrepository.com/artifact/org.springframework.boot/spring-boot-starter-web -->
-<!-- 		<dependency>
-			<groupId>org.springframework.boot</groupId>
-			<artifactId>spring-boot-starter-web</artifactId>
-			<version>2.3.0.RELEASE</version>
-		</dependency> -->
-
-		<!-- https://mvnrepository.com/artifact/org.springframework/spring-context -->
+		<!-- dipendenza spring core per ottenere l'IOC offerto da Spring. In contesti 
+			enterprise è necessario adattare le annotation del baserepository con le 
+			IOC opportune -->
 		<dependency>
 			<groupId>org.springframework</groupId>
 			<artifactId>spring-core</artifactId>
 			<version>${spring-framework.version}</version>
 		</dependency>
-<!-- 		<dependency>
-			<groupId>org.springframework</groupId>
-			<artifactId>spring-context</artifactId>
-			<version>${spring-framework.version}</version>
-		</dependency> -->
 		
-		<!-- per i test -->
+		<!-- per i test . i junit si pongono da client , applicazioni, e questo modulo permette di simulare contesti springboot -->
  		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-data-jpa</artifactId>
-			<version>2.3.0.RELEASE</version>
+			<version>${spring-boot.version}</version>
 		</dependency> 
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-test</artifactId>
+			<version>${spring-boot.version}</version>
+			<scope>test</scope>
+			<exclusions>
+				<exclusion>
+					<groupId>org.junit.vintage</groupId>
+					<artifactId>junit-vintage-engine</artifactId>
+				</exclusion>
+			</exclusions>
+		</dependency>
+				
+		<!-- driver accesso database commentato da git. questo connector soffre di un bug di vulnerabilita -->
+		<!-- 
+		Scommentare solo in locale, e in git lasciare commentato.
+		<dependency>
+			<groupId>mysql</groupId>
+			<artifactId>mysql-connector-java</artifactId>
+			<version>5.1.33</version>
+		</dependency>		
+		-->
+
+		<dependency>
+			<groupId>org.slf4j</groupId>
+			<artifactId>slf4j-api</artifactId>
+			<version>${slf4j.version}</version>
+			<scope>compile</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.slf4j</groupId>
+			<artifactId>slf4j-log4j12</artifactId>
+			<version>1.7.12</version>
+		</dependency>
+		<dependency>
+			<groupId>ch.qos.logback</groupId>
+			<artifactId>logback-classic</artifactId>
+			<version>${logback.version}</version>
+		</dependency>
+
+		<dependency>
+			<groupId>commons-lang</groupId>
+			<artifactId>commons-lang</artifactId>
+			<version>2.6</version>
+		</dependency>
 
 		<!-- Jackson . varia spesso la versioe per fix di sicurezza. E' fondamentale 
 			per la serializzazione json su resteasy e altri -->
@@ -71,19 +113,8 @@
 			<artifactId>jackson-core</artifactId>
 			<version>${jackson.version}</version>
 		</dependency>
-		<dependency>
-			<groupId>junit</groupId>
-			<artifactId>junit</artifactId>
-			<version>4.13</version>
-			<scope>test</scope>
-		</dependency>
 
 		<!-- inizio parte backend -->
-		<dependency>
-			<groupId>commons-lang</groupId>
-			<artifactId>commons-lang</artifactId>
-			<version>2.6</version>
-		</dependency>
 		<dependency>
 			<groupId>org.hsqldb</groupId>
 			<artifactId>hsqldb</artifactId>
@@ -96,23 +127,6 @@
 			<version>${hsqldb.version}</version>
 		</dependency>
 
-
-		<dependency>
-			<groupId>joda-time</groupId>
-			<artifactId>joda-time</artifactId>
-			<version>2.10.1</version>
-		</dependency>
-		<dependency>
-			<groupId>org.slf4j</groupId>
-			<artifactId>slf4j-api</artifactId>
-			<version>${slf4j.version}</version>
-			<scope>compile</scope>
-		</dependency>
-		<dependency>
-			<groupId>ch.qos.logback</groupId>
-			<artifactId>logback-classic</artifactId>
-			<version>${logback.version}</version>
-		</dependency>
 		<!-- Hibernate spatial versione 5 -->
 		<dependency>
 			<groupId>org.hibernate</groupId>
@@ -140,15 +154,7 @@
 			<artifactId>hibernate-c3p0</artifactId>
 			<version>${hibernate.version}</version>
 		</dependency>
-		<!-- <dependency> <groupId>org.jadira.usertype</groupId> <artifactId>usertype.core</artifactId> 
-			<version>5.0.0.GA</version> </dependency> -->
-		<!-- <dependency> <groupId>c3p0</groupId> <artifactId>c3p0</artifactId> 
-			<version>0.9.1.2</version> </dependency> -->
-		<dependency>
-			<groupId>org.slf4j</groupId>
-			<artifactId>slf4j-log4j12</artifactId>
-			<version>1.7.12</version>
-		</dependency>
+
 		<dependency>
 			<groupId>org.javassist</groupId>
 			<artifactId>javassist</artifactId>
@@ -166,13 +172,7 @@
 		</dependency>
 		<!-- fine parte backend -->
 
-		<!-- driver accesso database commentato da git. questo connector soffre di un bug di vulnerabilita 
-		<dependency>
-			<groupId>mysql</groupId>
-			<artifactId>mysql-connector-java</artifactId>
-			<version>5.1.33</version>
-		</dependency>
-		-->
+
 	</dependencies>
 
 	<reporting>
