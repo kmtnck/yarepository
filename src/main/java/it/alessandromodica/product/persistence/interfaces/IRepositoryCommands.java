@@ -10,7 +10,7 @@ public interface IRepositoryCommands<T, JOIN> {
 
 	public void deleteAll() throws RepositoryException;
 
-	public void deleteFromId(Object id, String nameField) throws RepositoryException;
+	public void deleteFromId(Object id, String nameField, Class<T> classEntity) throws RepositoryException;
 	
 	public void update(T obj) throws RepositoryException;
 	

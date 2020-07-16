@@ -52,7 +52,7 @@ import it.alessandromodica.product.persistence.searcher.YAFilterSerializeCriteri
 public class BaseRepository<T, JOIN> implements IRepositoryQueries<T, JOIN>, IRepositoryCommands<T, JOIN>{
 
 	@PersistenceContext
-	EntityManager em;
+	protected EntityManager em;
 
 	private static final Logger log = Logger.getLogger(BaseRepository.class);
 
@@ -530,10 +530,10 @@ public class BaseRepository<T, JOIN> implements IRepositoryQueries<T, JOIN>, IRe
 	}
 
 	@Transactional
-	public void deleteFromId(Object id, String nameField) throws RepositoryException {
+	public void deleteFromId(Object id, String nameField, Class<T> classEntity) throws RepositoryException {
 
 		try {
-
+			setClass(classEntity);
 			em.createQuery("DELETE FROM " + nameClass + " WHERE " + nameField + "=" + id).executeUpdate();
 
 		} catch (Exception ex) {
@@ -732,9 +732,11 @@ public class BaseRepository<T, JOIN> implements IRepositoryQueries<T, JOIN>, IRe
 		}
 	}
 
-	public Number getMax(String nameField) throws RepositoryException {
+	public Number getMax(String nameField, Class<T> classEntity) throws RepositoryException {
 		try {
 
+			setClass(classEntity);
+			
 			Number result = retrieveMax(nameField, em);
 			return result;
 		} catch (RuntimeException e) {
@@ -744,6 +746,7 @@ public class BaseRepository<T, JOIN> implements IRepositoryQueries<T, JOIN>, IRe
 		}
 	}
 
+	@Deprecated
 	public Number getMax(String nameField, EntityManager em) throws RepositoryException {
 
 		Number result = retrieveMax(nameField, em);

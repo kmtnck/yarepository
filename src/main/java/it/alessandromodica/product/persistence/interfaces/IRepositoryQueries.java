@@ -33,6 +33,6 @@ public interface IRepositoryQueries<T, JOIN> {
 	
 	int getCount(YAFilterSerializeCriteria serializeCriteria) throws RepositoryException;
 
-	Number getMax(String nameField) throws RepositoryException;
+	Number getMax(String nameField, Class<T> classEntity) throws RepositoryException;
 
 }
