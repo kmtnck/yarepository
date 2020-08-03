@@ -127,8 +127,6 @@ public class BaseRepository<T, JOIN> implements IRepositoryQueries<T, JOIN>, IRe
 		} else
 			query = query.select(root).distinct(true);
 
-		//query = query.select(root);
-
 		List<Predicate> predicates = composeQuery(builder, root, serializeCriteria);
 		query.where(predicates.toArray(new Predicate[predicates.size()]));
 
@@ -142,12 +140,6 @@ public class BaseRepository<T, JOIN> implements IRepositoryQueries<T, JOIN>, IRe
 			}
 
 			cOrder = getOrderByRoot(builder, root, cOrderBy, serializeCriteria.getDescendent() || isDescendent);
-
-			/*
-			 * if (serializeCriteria.getDescendent() || isDescendent) { cOrder =
-			 * builder.desc(root.get(cOrderBy)); } else { cOrder =
-			 * builder.asc(root.get(cOrderBy)); }
-			 */
 
 			listsOrder.add(cOrder);
 		}
@@ -184,19 +176,6 @@ public class BaseRepository<T, JOIN> implements IRepositoryQueries<T, JOIN>, IRe
 		}
 
 		return cOrder;
-	}
-
-	protected List<Predicate> buildPredicates(String alias, YAFilterSerializeCriteria serializeCriteria)
-			throws RepositoryException {
-		CriteriaBuilder builder = em.getCriteriaBuilder();
-		CriteriaQuery<T> query = builder.createQuery(classEntity);
-		Root<T> root = query.from(classEntity);
-		if (alias != null)
-			root.alias(alias);
-
-		List<Predicate> predicates = composeQuery(builder, root, serializeCriteria);
-
-		return predicates;
 	}
 
 	@SuppressWarnings("rawtypes")
@@ -706,6 +685,31 @@ public class BaseRepository<T, JOIN> implements IRepositoryQueries<T, JOIN>, IRe
 		return obj;
 	}
 
+	/*
+	 * public int getCount(YAFilterSerializeCriteria serializeCriteria) throws
+	 * RepositoryException { try {
+	 * 
+	 * setClass(serializeCriteria.getClassEntity());
+	 * 
+	 * CriteriaBuilder builder = em.getCriteriaBuilder();
+	 * 
+	 * String alias = nameClass.replace(".", ""); List<Predicate> predicates =
+	 * buildPredicates(alias, serializeCriteria);
+	 * 
+	 * CriteriaQuery<Long> countQuery = builder.createQuery(Long.class); Root<T>
+	 * entity_ = countQuery.from(classEntity); entity_.alias(alias);
+	 * countQuery.select(builder.count(entity_));
+	 * countQuery.where(predicates.toArray(new Predicate[predicates.size()]));
+	 * 
+	 * Long count = em.createQuery(countQuery).getSingleResult();
+	 * 
+	 * return count.intValue(); } catch (RuntimeException e) {
+	 * log.error("Errore durante il count di entita " + e.getMessage(), e); throw
+	 * new RepositoryException(e);
+	 * 
+	 * } }
+	 */
+	
 	public int getCount(YAFilterSerializeCriteria serializeCriteria) throws RepositoryException {
 		try {
 
@@ -713,13 +717,13 @@ public class BaseRepository<T, JOIN> implements IRepositoryQueries<T, JOIN>, IRe
 
 			CriteriaBuilder builder = em.getCriteriaBuilder();
 
-			String alias = nameClass.replace(".", "");
-			List<Predicate> predicates = buildPredicates(alias, serializeCriteria);
-
 			CriteriaQuery<Long> countQuery = builder.createQuery(Long.class);
-			Root<T> entity_ = countQuery.from(classEntity);
-			entity_.alias(alias);
-			countQuery.select(builder.count(entity_));
+			Root<T> root = countQuery.from(classEntity);
+
+			List<Predicate> predicates = composeQuery(builder, root, serializeCriteria);
+
+			countQuery.select(builder.countDistinct(root));
+
 			countQuery.where(predicates.toArray(new Predicate[predicates.size()]));
 
 			Long count = em.createQuery(countQuery).getSingleResult();
