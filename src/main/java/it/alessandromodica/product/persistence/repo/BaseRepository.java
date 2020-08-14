@@ -114,13 +114,22 @@ public class BaseRepository<T, JOIN> implements IRepositoryQueries<T, JOIN>, IRe
 		setClass(serializeCriteria.getClassEntity());
 
 		CriteriaBuilder builder = em.getCriteriaBuilder();
-		CriteriaQuery<T> query = builder.createQuery(classEntity);
+		//Si rende il tipo del criteriaquery raw a inizializzazione
+		CriteriaQuery query = builder.createQuery(classEntity);
 
 		Root<T> root = query.from(classEntity);
 		if (alias != null)
 			root.alias(alias);
 
 		if (serializeCriteria.getListFieldsProjection().size() > 0) {
+			
+			//se esiste almeno una proiezione significa che il tracciato dati deve essere definito con il tipo Object[]
+			//e' l'istruzione piu significativa per gestire correttamente e linearmente un tracciato dati inferiore a quello previsto dalla entita'
+			query = builder.createQuery(Object[].class);
+			//dopo aver eseguito l'override della query, parallelamente si ridefinisce il root della query Object[] sulla stessa entita
+			//Si ridefinisce la root con la nuova proiezione
+			root = query.from(classEntity);
+			
 			Selection[] projections = getProjections(serializeCriteria.getListFieldsProjection(), root, query);
 			if (projections.length > 0)
 				query.multiselect(projections).distinct(true);
@@ -184,7 +193,6 @@ public class BaseRepository<T, JOIN> implements IRepositoryQueries<T, JOIN>, IRe
 		for (String cField : fieldsprojection) {
 			try {
 				projections.add(root.get(cField));
-				query.groupBy(root.get(cField));
 			} catch (Exception e) {
 				continue;
 			}
