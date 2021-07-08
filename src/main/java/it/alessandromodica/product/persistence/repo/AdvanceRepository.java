@@ -1,8 +1,9 @@
 package it.alessandromodica.product.persistence.repo;
 
-import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
+import java.util.Map;
 
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
@@ -22,6 +23,10 @@ import javax.persistence.metamodel.Metamodel;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Repository;
+
+import it.alessandromodica.product.persistence.exceptions.RepositoryException;
+import it.alessandromodica.product.persistence.searcher.YAFilterOperatorClause.Operators;
+import it.alessandromodica.product.persistence.searcher.YAFilterSearch;
 
 /**
  * Classe astratta in cui sono raccolte le implementazioni standard per
@@ -475,17 +480,108 @@ public class AdvanceRepository {
 		}
 	}
 
-	public void add(Object obj) {
-
-		setClass((Class<?>) obj.getClass());
-
-		try {
-			create(obj, em);
-		} catch (RuntimeException ex) {
-			throw ex;
-		}
+	public Predicate createEqual(CriteriaBuilder builder, Root<?> root, String fieldHB, Object valueKey) {
+		Predicate equalpred = builder.equal(getPathByRoot(root, fieldHB), valueKey);
+		return equalpred;
 	}
 
+	public Predicate createIsZero(CriteriaBuilder builder, Root<?> root, String cIsZero) {
+		Predicate equalIsZero = builder.equal(getPathByRoot(root, cIsZero), 0);
+		return equalIsZero;
+	}
+
+	public Predicate createIsNotNull(CriteriaBuilder builder, Root<?> root, String cIsNotNull) {
+		Predicate notNullpred = builder.isNotNull(getPathByRoot(root, cIsNotNull));
+		return notNullpred;
+	}
+
+	public Predicate createIsNull(CriteriaBuilder builder, Root<?> root, String cIsNull) {
+		Predicate nullpred = builder.isNull(getPathByRoot(root, cIsNull));
+		return nullpred;
+	}
+
+	public Predicate createNotIn(Root<?> root, String cNotIn, Object[] listNotIn) {
+		Predicate notpred = getPathByRoot(root, cNotIn).in(listNotIn).not();
+		return notpred;
+	}
+
+	public Predicate createIn(Root<?> root, String cIn, Object[] listIn) {
+		Predicate inpred = getPathByRoot(root, cIn).in(listIn);
+		return inpred;
+	}
+
+	public Predicate createLike(CriteriaBuilder builder, Root<?> root, String field, Object value) {
+		Expression<String> rootField = root.get(field);
+		Predicate likepred = builder.like(rootField, value.toString());
+		return likepred;
+	}
+
+	public Predicate createJoin(CriteriaBuilder builder, Root<?> root, String entityToJoin, String fieldToJoin,
+			Object valueToJoin) {
+		Predicate predJoin = null;
+		Expression<Object> exp = setFieldJoin(root.join(entityToJoin), fieldToJoin);
+		predJoin = builder.equal(exp, valueToJoin);
+		return predJoin;
+	}
+	
+	private class OperatorClause<K extends Comparable<? super K>> {
+
+		public Predicate buildPredicato(CriteriaBuilder builder, Map<String, Object> cOper, Root<?> root) {
+
+			Predicate predicato = null;
+
+			String field = cOper.get(YAFilterSearch.NAME_FIELD).toString();
+			Operators operatore = Enum.valueOf(Operators.class, cOper.get("_operatore").toString());
+
+			Expression<K> rootField = root.get(field);
+			K value = (K) cOper.get(YAFilterSearch.VALUE_FIELD);
+
+			switch (operatore) {
+			case minusequals:
+				predicato = builder.lessThanOrEqualTo(rootField, value);
+				break;
+			case minus:
+				predicato = builder.lessThan(rootField, value);
+				break;
+			case majorequals:
+				predicato = builder.greaterThanOrEqualTo(rootField, value);
+				break;
+			case major:
+				predicato = builder.greaterThan(rootField, value);
+				break;
+			case disequals:
+				predicato = builder.notEqual(rootField, value);
+				break;
+			default:
+				break;
+			}
+
+			return predicato;
+		}
+
+	}
+	
+	public Predicate createOperator(CriteriaBuilder builder, Root<?> root, Map<String, Object> cOper,
+			Class<?> typeData) throws RepositoryException {
+		Predicate predicato = null;
+		if (typeData != null) {
+			OperatorClause buildPredicato = null;
+
+			if (typeData.getName().contains("Date")) {
+				buildPredicato = new OperatorClause<Date>();
+			} else if (typeData.getName().contains("Integer")) {
+				buildPredicato = new OperatorClause<Integer>();
+			} else if (typeData.getName().contains("Double")) {
+				buildPredicato = new OperatorClause<Double>();
+			} else
+				throw new RepositoryException(
+						"Entita' di clausola operatore non riconosciuta " + typeData.getName());
+
+			predicato = buildPredicato.buildPredicato(builder, cOper, root);
+		}
+		return predicato;
+	}	
+	
 	public void update(Object obj) {
 
 		setClass((Class<?>) obj.getClass());

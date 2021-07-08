@@ -8,7 +8,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
-import javax.persistence.EntityGraph;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 import javax.persistence.Query;
@@ -16,7 +15,6 @@ import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Expression;
 import javax.persistence.criteria.Join;
-import javax.persistence.criteria.JoinType;
 import javax.persistence.criteria.Order;
 import javax.persistence.criteria.Path;
 import javax.persistence.criteria.Predicate;
@@ -82,29 +80,6 @@ public class BaseRepository<T, JOIN> implements IRepositoryQueries<T, JOIN>, IRe
 
 	protected Query buildCriteriaQuery(YAFilterSerializeCriteria serializeCriteria) throws RepositoryException {
 		return buildCriteriaQuery(null, serializeCriteria);
-	}
-
-	@SuppressWarnings("rawtypes")
-	private static <Y extends Comparable<? super Y>> Predicate createRangePredicate(CriteriaBuilder builder,
-			Expression field, Object start, Object end, Class<?> typeData) {
-		if (start != null && end != null) {
-			// TODO :asserts!
-
-			if (start.equals(end))
-				return builder.equal(field, (Y) start);
-
-			if (typeData == null || !typeData.getName().contains("String")) {
-				return builder.between(field, (Y) start, (Y) end);
-			} else {
-				return builder.and(builder.greaterThanOrEqualTo(field, (Y) start),
-						builder.lessThanOrEqualTo(field, (Y) end));
-			}
-
-		} else if (start != null) {
-			return builder.greaterThanOrEqualTo(field, (Y) start);
-		} else {
-			return builder.lessThanOrEqualTo(field, (Y) end);
-		}
 	}
 
 	@SuppressWarnings("rawtypes")
@@ -202,26 +177,27 @@ public class BaseRepository<T, JOIN> implements IRepositoryQueries<T, JOIN>, IRe
 
 	}
 
+	/**
+	 * Metodo gregario di buildCriteriaQuery per fornire la lista di predicati eseguendo il parsing dell'oggetto FilterSerialize
+	 */
 	@SuppressWarnings("rawtypes")
-	private List<Predicate> composeQuery(CriteriaBuilder builder, Root<T> root,
-			YAFilterSerializeCriteria serializeCriteria) throws RepositoryException {
+	private List<Predicate> composeQuery(CriteriaBuilder builder, Root<T> root, YAFilterSerializeCriteria serializeCriteria)
+			throws RepositoryException {
 
 		List<Predicate> predicates = new ArrayList<Predicate>(0);
 
-		// aggiunge inner join per entity graph
-		for (String cEg : serializeCriteria.getListEntityGraph()) {
-			EntityGraph<T> eg = (EntityGraph<T>) em.getEntityGraph(cEg);
-			eg.getAttributeNodes().stream().forEach(an -> {
-				root.fetch(an.getAttributeName(), JoinType.INNER);
-			});
-		}
-
 		for (YAFilterJoinClause<JOIN> cJoin : serializeCriteria.getListJoinClause()) {
 
-			Join<T, JOIN> righeJoin = root.join(cJoin.getEntityToJoin());
-			Expression<Object> exp = setFieldJoin(righeJoin, cJoin.getFieldToJoin());
 
-			builder.equal(exp, cJoin.getValueToJoin());
+			//XXX: possono esserci varie modalita di join. bisogna sempre tenere in considerazione l'entity graph definito sul bean di testata
+			String entityToJoin = cJoin.getEntityToJoin();
+			String fieldToJoin = cJoin.getFieldToJoin();
+			Object valueToJoin = cJoin.getValueToJoin();
+
+			Predicate predJoin = createJoin(builder, root, entityToJoin, fieldToJoin, valueToJoin);
+
+			predicates.add(predJoin);
+
 		}
 
 		Map<String, Object> resultEq = serializeCriteria.getListEquals();
@@ -230,7 +206,10 @@ public class BaseRepository<T, JOIN> implements IRepositoryQueries<T, JOIN>, IRe
 			String cKey = cEntry.getKey().toString();
 
 			String fieldHB = cKey;
-			predicates.add(builder.equal(setFieldRoot(root, fieldHB), resultEq.get(cKey)));
+			Object valueKey = resultEq.get(cKey);
+			
+			Predicate equalpred = createEqual(builder, root, fieldHB, valueKey);
+			predicates.add(equalpred);
 		}
 
 		for (String cBool : serializeCriteria.getListValueBool().keySet()) {
@@ -241,8 +220,8 @@ public class BaseRepository<T, JOIN> implements IRepositoryQueries<T, JOIN>, IRe
 		for (Map<String, Object> cLike : serializeCriteria.getListLike()) {
 			String field = cLike.get(YAFilterSearch.NAME_FIELD).toString();
 			Object value = cLike.get(YAFilterSearch.VALUE_FIELD);
-			Expression<String> rootField = root.get(field);
-			predicates.add(builder.like(rootField, value.toString()));
+			Predicate likepred = createLike(builder, root, field, value);
+			predicates.add(likepred);
 		}
 
 		for (Map<String, Object> cInsLike : serializeCriteria.getListLikeInsensitive()) {
@@ -273,22 +252,8 @@ public class BaseRepository<T, JOIN> implements IRepositoryQueries<T, JOIN>, IRe
 		for (Map<String, Object> cOper : serializeCriteria.getListOperator()) {
 
 			Class<?> typeData = (Class) cOper.get(YAFilterSearch.TYPE_DATA);
-			Predicate predicato = null;
-			if (typeData != null) {
-				OperatorClause buildPredicato = null;
-
-				if (typeData.getName().contains("Date")) {
-					buildPredicato = new OperatorClause<Date>();
-				} else if (typeData.getName().contains("Integer")) {
-					buildPredicato = new OperatorClause<Integer>();
-				} else if (typeData.getName().contains("Double")) {
-					buildPredicato = new OperatorClause<Double>();
-				} else
-					throw new RepositoryException(
-							"Entita' di clausola operatore non riconosciuta " + typeData.getName());
-
-				predicato = buildPredicato.buildPredicato(builder, cOper, root);
-			}
+			
+			Predicate predicato = createOperator(builder, root, cOper, typeData);
 
 			predicates.add(predicato);
 		}
@@ -297,22 +262,27 @@ public class BaseRepository<T, JOIN> implements IRepositoryQueries<T, JOIN>, IRe
 
 			Object[] listIn = serializeCriteria.getListIn().get(cIn);
 
-			predicates.add(setFieldRoot(root, cIn).in(listIn));
+			Predicate inpred = createIn(root, cIn, listIn);
+			
+			predicates.add(inpred);
 
 		}
 
 		for (String cNotIn : serializeCriteria.getListNotIn().keySet()) {
 
 			Object[] listNotIn = serializeCriteria.getListNotIn().get(cNotIn);
-			predicates.add(setFieldRoot(root, cNotIn).in(listNotIn).not());
+			Predicate notpred = createNotIn(root, cNotIn, listNotIn);
+			predicates.add(notpred);
 		}
 
 		for (String cIsNull : serializeCriteria.getListIsNull()) {
-			predicates.add(builder.isNull(setFieldRoot(root, cIsNull)));
+			Predicate nullpred = createIsNull(builder, root, cIsNull);
+			predicates.add(nullpred);
 		}
 
 		for (String cIsNotNull : serializeCriteria.getListIsNotNull()) {
-			predicates.add(builder.isNotNull(setFieldRoot(root, cIsNotNull)));
+			Predicate notNullpred = createIsNotNull(builder, root, cIsNotNull);
+			predicates.add(notNullpred);
 		}
 
 		// XXX: la lista dei valori non vuoti converge con quelli non nulli.
@@ -322,9 +292,11 @@ public class BaseRepository<T, JOIN> implements IRepositoryQueries<T, JOIN>, IRe
 		}
 
 		for (String cIsZero : serializeCriteria.getListIsZero()) {
-			predicates.add(builder.equal(setFieldRoot(root, cIsZero), 0));
+			Predicate equalIsZero = createIsZero(builder, root, cIsZero);
+			predicates.add(equalIsZero);
 		}
 
+		//Fase di analisi in ricorsione di eventuali altri filtri ricerca legati in clausola or
 		List<Predicate> orPredicates = new ArrayList<Predicate>(0);
 		for (YAFilterSerializeCriteria cOr : serializeCriteria.getListOrClause()) {
 
@@ -338,29 +310,113 @@ public class BaseRepository<T, JOIN> implements IRepositoryQueries<T, JOIN>, IRe
 			predicates.add(orPredicate);
 		}
 
-		if (serializeCriteria.isNot()) {
-			List<Predicate> notpred = new ArrayList<Predicate>(0);
-			if (predicates.size() > 0) {
-				Predicate concatPredicate = null;
-				for (Predicate predicate : predicates) {
-					concatPredicate = builder.and(predicate);
-				}
-				Predicate not = builder.not(concatPredicate);
-				notpred.add(not);
-			}
-			return notpred;
-		} else
-			return predicates;
+		return predicates;
 
 	}
 
-	private Path<Object> setFieldRoot(Root<T> root, String field) {
+
+	private Predicate createEqual(CriteriaBuilder builder, Root<T> root, String fieldHB, Object valueKey) {
+		Predicate equalpred = builder.equal(setFieldRoot(root, fieldHB), valueKey);
+		return equalpred;
+	}
+
+	private Predicate createIsZero(CriteriaBuilder builder, Root<T> root, String cIsZero) {
+		Predicate equalIsZero = builder.equal(setFieldRoot(root, cIsZero), 0);
+		return equalIsZero;
+	}
+
+	private Predicate createIsNotNull(CriteriaBuilder builder, Root<T> root, String cIsNotNull) {
+		Predicate notNullpred = builder.isNotNull(setFieldRoot(root, cIsNotNull));
+		return notNullpred;
+	}
+
+	private Predicate createIsNull(CriteriaBuilder builder, Root<T> root, String cIsNull) {
+		Predicate nullpred = builder.isNull(setFieldRoot(root, cIsNull));
+		return nullpred;
+	}
+
+	private Predicate createNotIn(Root<T> root, String cNotIn, Object[] listNotIn) {
+		Predicate notpred = setFieldRoot(root, cNotIn).in(listNotIn).not();
+		return notpred;
+	}
+
+	private Predicate createIn(Root<T> root, String cIn, Object[] listIn) {
+		Predicate inpred = setFieldRoot(root, cIn).in(listIn);
+		return inpred;
+	}
+
+	private Predicate createOperator(CriteriaBuilder builder, Root<T> root, Map<String, Object> cOper,
+			Class<?> typeData) throws RepositoryException {
+		Predicate predicato = null;
+		if (typeData != null) {
+			OperatorClause buildPredicato = null;
+
+			if (typeData.getName().contains("Date")) {
+				buildPredicato = new OperatorClause<Date>();
+			} else if (typeData.getName().contains("Integer")) {
+				buildPredicato = new OperatorClause<Integer>();
+			} else if (typeData.getName().contains("Double")) {
+				buildPredicato = new OperatorClause<Double>();
+			} else
+				throw new RepositoryException(
+						"Entita' di clausola operatore non riconosciuta " + typeData.getName());
+
+			predicato = buildPredicato.buildPredicato(builder, cOper, root);
+		}
+		return predicato;
+	}
+
+	private Predicate createLike(CriteriaBuilder builder, Root<T> root, String field, Object value) {
+		Expression<String> rootField = root.get(field);
+		Predicate likepred = builder.like(rootField, value.toString());
+		return likepred;
+	}
+
+	private Predicate createJoin(CriteriaBuilder builder, Root<T> root, String entityToJoin, String fieldToJoin,
+			Object valueToJoin) {
+		Predicate predJoin = null;
+		Expression<Object> exp = setFieldJoin(root.join(entityToJoin), fieldToJoin);
+		predJoin = builder.equal(exp, valueToJoin);
+		return predJoin;
+	}
+
+	private <Y extends Comparable<? super Y>> Predicate createRangePredicate(CriteriaBuilder builder,
+			Expression field, Object start, Object end, Class<?> typeData) {
+		if (start != null && end != null) {
+			// TODO :asserts!
+
+			if (start.equals(end))
+				return builder.equal(field, (Y) start);
+
+			if (typeData == null || !typeData.getName().contains("String")) {
+				return builder.between(field, (Y) start, (Y) end);
+			} else {
+				return builder.and(builder.greaterThanOrEqualTo(field, (Y) start),
+						builder.lessThanOrEqualTo(field, (Y) end));
+			}
+
+		} else if (start != null) {
+			return builder.greaterThanOrEqualTo(field, (Y) start);
+		} else {
+			return builder.lessThanOrEqualTo(field, (Y) end);
+		}
+	}
+
+	private Path<Object> setFieldRoot(Root root, String field) {
 
 		String[] splitField = field.split("\\.");
-		if (splitField.length == 2) {
-			return root.get(splitField[0]).get(splitField[1]);
-		} else
-			return root.get(field);
+		Path<Object> result = null;
+
+		result = root.get(splitField[0]);
+		if (splitField.length > 1) {
+
+			for (int i = 1; i < splitField.length; i++) {
+				result = result.get(splitField[i]);
+			}
+
+		}
+		
+		return result;
 	}
 
 	private Path<Object> setFieldJoin(Join<T, JOIN> join, String field) {
