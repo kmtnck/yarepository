@@ -43,7 +43,7 @@ import org.springframework.stereotype.Repository;
  *               definisce il target
  */
 @Repository
-public class AdvanceRepository<T, JOIN> {
+public class AdvanceRepository {
 
 	private final Logger log = LoggerFactory.getLogger(this.getClass());
 
@@ -52,9 +52,9 @@ public class AdvanceRepository<T, JOIN> {
 	@PersistenceContext
 	EntityManager em;
 
-	protected Class<T> classEntity;
+	protected Class<?> classEntity;
 
-	protected void setClass(Class<T> classEntity) {
+	protected void setClass(Class<?> classEntity) {
 
 		if (classEntity != null) {
 			this.nameClass = classEntity.getName();
@@ -129,7 +129,7 @@ public class AdvanceRepository<T, JOIN> {
 	public class InfoHibernateQuery {
 		private CriteriaBuilder builder;
 		private CriteriaQuery criteria;
-		private Root<T> root;
+		private Root<?> root;
 		private List<Expression> predicates = new ArrayList<Expression>();
 		private EntityType entity_;
 
@@ -149,11 +149,11 @@ public class AdvanceRepository<T, JOIN> {
 			this.criteria = criteria;
 		}
 
-		public Root<T> getRoot() {
+		public Root<?> getRoot() {
 			return root;
 		}
 
-		public void setRoot(Root<T> root) {
+		public void setRoot(Root<?> root) {
 			this.root = root;
 		}
 
@@ -205,7 +205,7 @@ public class AdvanceRepository<T, JOIN> {
 
 		// Si inizializza il tipo del criteriaquery come tipo raw
 		CriteriaQuery criteria = null;
-		Root<T> root = null;
+		Root<?> root = null;
 		if (!countQuery) {
 
 			criteria = builder.createQuery(classEntity);
@@ -278,7 +278,7 @@ public class AdvanceRepository<T, JOIN> {
 	 * @param descendent
 	 * @return
 	 */
-	public Order getOrderByRoot(CriteriaBuilder builder, Root<T> root, String field, boolean descendent) {
+	public Order getOrderByRoot(CriteriaBuilder builder, Root<?> root, String field, boolean descendent) {
 
 		Order cOrder = null;
 		String[] splitField = field.split("\\.");
@@ -377,7 +377,7 @@ public class AdvanceRepository<T, JOIN> {
 	 * @param field
 	 * @return
 	 */
-	public Path<Object> setFieldJoin(Join<T, JOIN> join, String field) {
+	public Path<Object> setFieldJoin(Join join, String field) {
 
 		String[] splitField = field.split("\\.");
 		if (splitField.length == 2) {
@@ -393,9 +393,9 @@ public class AdvanceRepository<T, JOIN> {
 	 * 
 	 */
 
-	public List<T> getAll() {
+	public List<?> getAll() {
 		try {
-			List<T> obj = em.createQuery("from " + nameClass).getResultList();
+			List<?> obj = em.createQuery("from " + nameClass).getResultList();
 			return obj;
 		} catch (RuntimeException e) {
 			log.error("Errore durante il recupero di tutti gli elementi " + e.getMessage(), e);
@@ -409,15 +409,15 @@ public class AdvanceRepository<T, JOIN> {
 	 * scopo di istruire hibernate a costruire la query definendo un criterio di
 	 * ordinamento su un campo (nome field, no nome campo su db) asc o desc
 	 */
-	public List<T> getAll(Order orderby) {
+	public List<?> getAll(Order orderby) {
 
 		try {
 			CriteriaBuilder cb = em.getCriteriaBuilder();
-			CriteriaQuery<T> cq = cb.createQuery(classEntity);
+			CriteriaQuery<?> cq = cb.createQuery(classEntity);
 			cq.orderBy(orderby);
 			Query query = em.createQuery(cq);
 
-			List<T> obj = query.getResultList();
+			List<?> obj = query.getResultList();
 			return obj;
 		} catch (RuntimeException e) {
 			log.error("Errore durante il recupero di tutti gli elementi " + e.getMessage(), e);
@@ -426,18 +426,18 @@ public class AdvanceRepository<T, JOIN> {
 		}
 	}
 
-	public List<T> getAllOrdered(int elementAt, int amount, Order orderby) {
+	public List<?> getAllOrdered(int elementAt, int amount, Order orderby) {
 
 		try {
 
 			CriteriaBuilder cb = em.getCriteriaBuilder();
-			CriteriaQuery<T> cq = cb.createQuery(classEntity);
+			CriteriaQuery<?> cq = cb.createQuery(classEntity);
 			cq.orderBy(orderby);
 			Query query = em.createQuery(cq);
 			query.setMaxResults(amount);
 			query.setFirstResult(elementAt);
 
-			List<T> obj = query.getResultList();
+			List<?> obj = query.getResultList();
 			return obj;
 		} catch (RuntimeException e) {
 			log.error("Errore durante il recupero di tutti gli elementi " + e.getMessage(), e);
@@ -475,24 +475,9 @@ public class AdvanceRepository<T, JOIN> {
 		}
 	}
 
-	@Deprecated
-	public T getByCompositeId(T objId) {
+	public void add(Object obj) {
 
-		try {
-
-			Serializable id = (Serializable) objId;
-			return (T) em.getReference(classEntity, id);
-
-		} catch (RuntimeException e) {
-			log.error(e.getMessage(), e);
-			throw e;
-
-		}
-	}
-
-	public void add(T obj) {
-
-		setClass((Class<T>) obj.getClass());
+		setClass((Class<?>) obj.getClass());
 
 		try {
 			create(obj, em);
@@ -501,9 +486,9 @@ public class AdvanceRepository<T, JOIN> {
 		}
 	}
 
-	public void update(T obj) {
+	public void update(Object obj) {
 
-		setClass((Class<T>) obj.getClass());
+		setClass((Class<?>) obj.getClass());
 
 		try {
 			merge(obj, em);
@@ -513,9 +498,9 @@ public class AdvanceRepository<T, JOIN> {
 		}
 	}
 
-	public void delete(T obj) {
+	public void delete(Object obj) {
 
-		setClass((Class<T>) obj.getClass());
+		setClass((Class<?>) obj.getClass());
 
 		try {
 			remove(obj, em);
@@ -543,7 +528,7 @@ public class AdvanceRepository<T, JOIN> {
 		em.createQuery(hql).executeUpdate();
 	}
 
-	private void remove(T obj, EntityManager em) {
+	private void remove(Object obj, EntityManager em) {
 		try {
 			em.remove(em.contains(obj) ? obj : em.merge(obj));
 		} catch (RuntimeException e) {
@@ -552,7 +537,7 @@ public class AdvanceRepository<T, JOIN> {
 		}
 	}
 
-	private void create(T obj, EntityManager em) {
+	private void create(Object obj, EntityManager em) {
 		try {
 			em.persist(obj);
 		} catch (RuntimeException e) {
@@ -561,7 +546,7 @@ public class AdvanceRepository<T, JOIN> {
 		}
 	}
 
-	private void merge(T obj, EntityManager em) {
+	private void merge(Object obj, EntityManager em) {
 		try {
 			em.merge(obj);
 		} catch (RuntimeException e) {
@@ -570,7 +555,7 @@ public class AdvanceRepository<T, JOIN> {
 		}
 	}
 
-	public T getById(Object objId, Class<T> classentity) {
+	public Object getById(Object objId, Class<?> classentity) {
 
 		setClass(classentity);
 
@@ -578,10 +563,10 @@ public class AdvanceRepository<T, JOIN> {
 
 	}
 
-	private T retrieveById(Object objId, EntityManager em) {
-		T obj = null;
+	private Object retrieveById(Object objId, EntityManager em) {
+		Object obj = null;
 		try {
-			obj = (T) em.find(classEntity, objId);
+			obj = em.find(classEntity, objId);
 			return obj;
 		} catch (RuntimeException e) {
 			log.error("Errore durante il recupero di una entita dall'id " + e.getMessage(), e);
@@ -595,17 +580,17 @@ public class AdvanceRepository<T, JOIN> {
 	}
 
 	@Deprecated
-	public List<T> search(CriteriaQuery<T> criteria) {
+	public List<?> search(CriteriaQuery<?> criteria) {
 		return search(em.createQuery(criteria));
 	}
 
-	public List<T> search(InfoHibernateQuery infoquery) {
+	public List<?> search(InfoHibernateQuery infoquery) {
 		infoquery.injectPredicates();
 		return search(em.createQuery(infoquery.getCriteria()));
 	}
 	
-	private List<T> search(Query query) {
-		List<T> result = null;
+	private List<?> search(Query query) {
+		List<?> result = null;
 		try {
 			result = query.getResultList();
 			return result;
@@ -616,47 +601,47 @@ public class AdvanceRepository<T, JOIN> {
 	}
 
 	@Deprecated
-	public T getSingle(CriteriaQuery<T> criteria) throws Exception {
+	public Object getSingle(CriteriaQuery<?> criteria) throws Exception {
 		return getRetrieve(em.createQuery(criteria), UniqueStrategy.single);
 	}
 
 	@Deprecated
-	public T getSingleOrDefault(CriteriaQuery<T> criteria) throws Exception {
+	public Object getSingleOrDefault(CriteriaQuery<?> criteria) throws Exception {
 		return getRetrieve(em.createQuery(criteria), UniqueStrategy.singledefault);
 	}
 
 	@Deprecated
-	public T getFirst(CriteriaQuery<T> criteria) throws Exception {
+	public Object getFirst(CriteriaQuery<?> criteria) throws Exception {
 		return getRetrieve(em.createQuery(criteria), UniqueStrategy.first);
 	}
 
 	@Deprecated
-	public T getFirstOrDefault(CriteriaQuery<T> criteria) throws Exception {
+	public Object getFirstOrDefault(CriteriaQuery<?> criteria) throws Exception {
 		return getRetrieve(em.createQuery(criteria), UniqueStrategy.firstdefault);
 	}
 	
-	public T getSingle(InfoHibernateQuery infoquery) throws Exception {
+	public Object getSingle(InfoHibernateQuery infoquery) throws Exception {
 		infoquery.injectPredicates();
 		return getRetrieve(em.createQuery(infoquery.getCriteria()), UniqueStrategy.single);
 	}
 
-	public T getSingleOrDefault(InfoHibernateQuery infoquery) throws Exception {
+	public Object getSingleOrDefault(InfoHibernateQuery infoquery) throws Exception {
 		infoquery.injectPredicates();
 		return getRetrieve(em.createQuery(infoquery.getCriteria()), UniqueStrategy.singledefault);
 	}
 
-	public T getFirst(InfoHibernateQuery infoquery) throws Exception {
+	public Object getFirst(InfoHibernateQuery infoquery) throws Exception {
 		infoquery.injectPredicates();
 		return getRetrieve(em.createQuery(infoquery.getCriteria()), UniqueStrategy.first);
 	}
 
-	public T getFirstOrDefault(InfoHibernateQuery infoquery) throws Exception {
+	public Object getFirstOrDefault(InfoHibernateQuery infoquery) throws Exception {
 		infoquery.injectPredicates();
 		return getRetrieve(em.createQuery(infoquery.getCriteria()), UniqueStrategy.firstdefault);
 	}	
 
-	private T getRetrieve(Query query, UniqueStrategy uniquestrategy) throws Exception {
-		T obj = null;
+	private Object getRetrieve(Query query, UniqueStrategy uniquestrategy) throws Exception {
+		Object obj = null;
 		try {
 			obj = getUnique(query, uniquestrategy);
 			return obj;
@@ -667,11 +652,11 @@ public class AdvanceRepository<T, JOIN> {
 		}
 	}
 
-	private T getUnique(Query query, UniqueStrategy uniquestrategy) throws Exception {
+	private Object getUnique(Query query, UniqueStrategy uniquestrategy) throws Exception {
 
-		T obj = null;
+		Object obj = null;
 
-		List<T> result = query.getResultList();
+		List<Object> result = query.getResultList();
 
 		boolean checkStrategy = false;
 		boolean isSingle = false;
@@ -742,7 +727,7 @@ public class AdvanceRepository<T, JOIN> {
 		CriteriaBuilder builder = em.getCriteriaBuilder();
 
 		CriteriaQuery<Integer> criteriaQuery = builder.createQuery(Integer.class);
-		Root<T> classRoot = criteriaQuery.from(classEntity);
+		Root<?> classRoot = criteriaQuery.from(classEntity);
 		criteriaQuery.select(builder.max(getPathByRoot(classRoot, nameField).as(Integer.class)));
 		Number result = em.createQuery(criteriaQuery).getSingleResult();
 		return result;
