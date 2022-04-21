@@ -31,6 +31,10 @@ public class YAFilterSerializeCriteria implements Serializable  {
 	private List<Map<String, Object>> listbetween = new ArrayList<Map<String, Object>>();
 	private List<Map<String, Object>> listLike = new ArrayList<Map<String, Object>>();
 	private List<Map<String, Object>> listLikeInsensitive = new ArrayList<Map<String, Object>>();
+
+	private List<Map<String, Object>> listNotLike = new ArrayList<Map<String, Object>>();
+	private List<Map<String, Object>> listNotLikeInsensitive = new ArrayList<Map<String, Object>>();
+	
 	private List<Map<String, Object>> listOperator = new ArrayList<Map<String, Object>>();
 	private List<String> listOrderBy = new ArrayList<String>();
 	private List<String> listIsNull = new ArrayList<String>();
@@ -233,5 +237,21 @@ public class YAFilterSerializeCriteria implements Serializable  {
 
 	public void setNot(boolean not) {
 		this.not = not;
+	}
+
+	public List<Map<String, Object>> getListNotLike() {
+		return listNotLike;
+	}
+
+	public void setListNotLike(List<Map<String, Object>> listNotLike) {
+		this.listNotLike = listNotLike;
+	}
+
+	public List<Map<String, Object>> getListNotLikeInsensitive() {
+		return listNotLikeInsensitive;
+	}
+
+	public void setListNotLikeInsensitive(List<Map<String, Object>> listNotLikeInsensitive) {
+		this.listNotLikeInsensitive = listNotLikeInsensitive;
 	}
 }

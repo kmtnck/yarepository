@@ -47,7 +47,7 @@ import it.alessandromodica.product.persistence.searcher.YAFilterSerializeCriteri
  */
 @SuppressWarnings("unchecked")
 @Repository
-public class BaseRepository<T, JOIN> implements IRepositoryQueries<T, JOIN>, IRepositoryCommands<T, JOIN>{
+public class BaseRepository<T, JOIN> implements IRepositoryQueries<T, JOIN>, IRepositoryCommands<T, JOIN> {
 
 	@PersistenceContext
 	protected EntityManager em;
@@ -89,7 +89,7 @@ public class BaseRepository<T, JOIN> implements IRepositoryQueries<T, JOIN>, IRe
 		setClass(serializeCriteria.getClassEntity());
 
 		CriteriaBuilder builder = em.getCriteriaBuilder();
-		//Si rende il tipo del criteriaquery raw a inizializzazione
+		// Si rende il tipo del criteriaquery raw a inizializzazione
 		CriteriaQuery query = builder.createQuery(classEntity);
 
 		Root<T> root = query.from(classEntity);
@@ -97,14 +97,17 @@ public class BaseRepository<T, JOIN> implements IRepositoryQueries<T, JOIN>, IRe
 			root.alias(alias);
 
 		if (serializeCriteria.getListFieldsProjection().size() > 0) {
-			
-			//se esiste almeno una proiezione significa che il tracciato dati deve essere definito con il tipo Object[]
-			//e' l'istruzione piu significativa per gestire correttamente e linearmente un tracciato dati inferiore a quello previsto dalla entita'
+
+			// se esiste almeno una proiezione significa che il tracciato dati deve essere
+			// definito con il tipo Object[]
+			// e' l'istruzione piu significativa per gestire correttamente e linearmente un
+			// tracciato dati inferiore a quello previsto dalla entita'
 			query = builder.createQuery(Object[].class);
-			//dopo aver eseguito l'override della query, parallelamente si ridefinisce il root della query Object[] sulla stessa entita
-			//Si ridefinisce la root con la nuova proiezione
+			// dopo aver eseguito l'override della query, parallelamente si ridefinisce il
+			// root della query Object[] sulla stessa entita
+			// Si ridefinisce la root con la nuova proiezione
 			root = query.from(classEntity);
-			
+
 			Selection[] projections = getProjections(serializeCriteria.getListFieldsProjection(), root, query);
 			if (projections.length > 0)
 				query.multiselect(projections).distinct(true);
@@ -178,18 +181,19 @@ public class BaseRepository<T, JOIN> implements IRepositoryQueries<T, JOIN>, IRe
 	}
 
 	/**
-	 * Metodo gregario di buildCriteriaQuery per fornire la lista di predicati eseguendo il parsing dell'oggetto FilterSerialize
+	 * Metodo gregario di buildCriteriaQuery per fornire la lista di predicati
+	 * eseguendo il parsing dell'oggetto FilterSerialize
 	 */
 	@SuppressWarnings("rawtypes")
-	private List<Predicate> composeQuery(CriteriaBuilder builder, Root<T> root, YAFilterSerializeCriteria serializeCriteria)
-			throws RepositoryException {
+	private List<Predicate> composeQuery(CriteriaBuilder builder, Root<T> root,
+			YAFilterSerializeCriteria serializeCriteria) throws RepositoryException {
 
 		List<Predicate> predicates = new ArrayList<Predicate>(0);
 
 		for (YAFilterJoinClause<JOIN> cJoin : serializeCriteria.getListJoinClause()) {
 
-
-			//XXX: possono esserci varie modalita di join. bisogna sempre tenere in considerazione l'entity graph definito sul bean di testata
+			// XXX: possono esserci varie modalita di join. bisogna sempre tenere in
+			// considerazione l'entity graph definito sul bean di testata
 			String entityToJoin = cJoin.getEntityToJoin();
 			String fieldToJoin = cJoin.getFieldToJoin();
 			Object valueToJoin = cJoin.getValueToJoin();
@@ -207,7 +211,7 @@ public class BaseRepository<T, JOIN> implements IRepositoryQueries<T, JOIN>, IRe
 
 			String fieldHB = cKey;
 			Object valueKey = resultEq.get(cKey);
-			
+
 			Predicate equalpred = createEqual(builder, root, fieldHB, valueKey);
 			predicates.add(equalpred);
 		}
@@ -231,6 +235,20 @@ public class BaseRepository<T, JOIN> implements IRepositoryQueries<T, JOIN>, IRe
 			predicates.add(builder.like(builder.lower(rootField), value.toString().toLowerCase()));
 		}
 
+		for (Map<String, Object> cLike : serializeCriteria.getListNotLike()) {
+			String field = cLike.get(YAFilterSearch.NAME_FIELD).toString();
+			Object value = cLike.get(YAFilterSearch.VALUE_FIELD);
+			Predicate likepred = createNotLike(builder, root, field, value);
+			predicates.add(likepred);
+		}
+
+		for (Map<String, Object> cInsLike : serializeCriteria.getListNotLikeInsensitive()) {
+			String field = cInsLike.get(YAFilterSearch.NAME_FIELD).toString();
+			Object value = cInsLike.get(YAFilterSearch.VALUE_FIELD);
+			Expression<String> rootField = root.get(field);
+			predicates.add(builder.notLike(builder.lower(rootField), value.toString().toLowerCase()));
+		}
+
 		// Vincoli di controllo tra due valori, vale per il tipo integer, double e date
 		for (Map<String, Object> cBT : serializeCriteria.getListbetween()) {
 
@@ -252,7 +270,7 @@ public class BaseRepository<T, JOIN> implements IRepositoryQueries<T, JOIN>, IRe
 		for (Map<String, Object> cOper : serializeCriteria.getListOperator()) {
 
 			Class<?> typeData = (Class) cOper.get(YAFilterSearch.TYPE_DATA);
-			
+
 			Predicate predicato = createOperator(builder, root, cOper, typeData);
 
 			predicates.add(predicato);
@@ -263,7 +281,7 @@ public class BaseRepository<T, JOIN> implements IRepositoryQueries<T, JOIN>, IRe
 			Object[] listIn = serializeCriteria.getListIn().get(cIn);
 
 			Predicate inpred = createIn(root, cIn, listIn);
-			
+
 			predicates.add(inpred);
 
 		}
@@ -296,7 +314,8 @@ public class BaseRepository<T, JOIN> implements IRepositoryQueries<T, JOIN>, IRe
 			predicates.add(equalIsZero);
 		}
 
-		//Fase di analisi in ricorsione di eventuali altri filtri ricerca legati in clausola or
+		// Fase di analisi in ricorsione di eventuali altri filtri ricerca legati in
+		// clausola or
 		List<Predicate> orPredicates = new ArrayList<Predicate>(0);
 		for (YAFilterSerializeCriteria cOr : serializeCriteria.getListOrClause()) {
 
@@ -310,10 +329,19 @@ public class BaseRepository<T, JOIN> implements IRepositoryQueries<T, JOIN>, IRe
 			predicates.add(orPredicate);
 		}
 
-		return predicates;
+		if (serializeCriteria.isNot()) {
+			List<Predicate> negatepredicates = new ArrayList<Predicate>(0);
+			for (Predicate cp : predicates) {
+				Predicate negate = builder.not(cp);
+				negatepredicates.add(negate);
+			}
 
+			return negatepredicates;
+
+		} else {
+			return predicates;
+		}
 	}
-
 
 	private Predicate createEqual(CriteriaBuilder builder, Root<T> root, String fieldHB, Object valueKey) {
 		Predicate equalpred = builder.equal(setFieldRoot(root, fieldHB), valueKey);
@@ -358,8 +386,7 @@ public class BaseRepository<T, JOIN> implements IRepositoryQueries<T, JOIN>, IRe
 			} else if (typeData.getName().contains("Double")) {
 				buildPredicato = new OperatorClause<Double>();
 			} else
-				throw new RepositoryException(
-						"Entita' di clausola operatore non riconosciuta " + typeData.getName());
+				throw new RepositoryException("Entita' di clausola operatore non riconosciuta " + typeData.getName());
 
 			predicato = buildPredicato.buildPredicato(builder, cOper, root);
 		}
@@ -372,6 +399,12 @@ public class BaseRepository<T, JOIN> implements IRepositoryQueries<T, JOIN>, IRe
 		return likepred;
 	}
 
+	private Predicate createNotLike(CriteriaBuilder builder, Root<T> root, String field, Object value) {
+		Expression<String> rootField = root.get(field);
+		Predicate likepred = builder.notLike(rootField, value.toString());
+		return likepred;
+	}
+
 	private Predicate createJoin(CriteriaBuilder builder, Root<T> root, String entityToJoin, String fieldToJoin,
 			Object valueToJoin) {
 		Predicate predJoin = null;
@@ -380,8 +413,8 @@ public class BaseRepository<T, JOIN> implements IRepositoryQueries<T, JOIN>, IRe
 		return predJoin;
 	}
 
-	private <Y extends Comparable<? super Y>> Predicate createRangePredicate(CriteriaBuilder builder,
-			Expression field, Object start, Object end, Class<?> typeData) {
+	private <Y extends Comparable<? super Y>> Predicate createRangePredicate(CriteriaBuilder builder, Expression field,
+			Object start, Object end, Class<?> typeData) {
 		if (start != null && end != null) {
 			// TODO :asserts!
 
@@ -415,7 +448,7 @@ public class BaseRepository<T, JOIN> implements IRepositoryQueries<T, JOIN>, IRe
 			}
 
 		}
-		
+
 		return result;
 	}
 
@@ -773,7 +806,7 @@ public class BaseRepository<T, JOIN> implements IRepositoryQueries<T, JOIN>, IRe
 	 * 
 	 * } }
 	 */
-	
+
 	public int getCount(YAFilterSerializeCriteria serializeCriteria) throws RepositoryException {
 		try {
 
@@ -804,7 +837,7 @@ public class BaseRepository<T, JOIN> implements IRepositoryQueries<T, JOIN>, IRe
 		try {
 
 			setClass(classEntity);
-			
+
 			Number result = retrieveMax(nameField, em);
 			return result;
 		} catch (RuntimeException e) {

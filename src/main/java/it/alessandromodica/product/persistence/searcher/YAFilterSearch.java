@@ -60,6 +60,7 @@ public abstract class YAFilterSearch extends YAFilterBase implements Serializabl
 
 	private List<YAFilterBetweenClause> listBetweenClause = new ArrayList<YAFilterBetweenClause>();
 	private List<YAFilterLikeClause> listLikeClause = new ArrayList<YAFilterLikeClause>();
+	private List<YAFilterLikeClause> listNotLikeClause = new ArrayList<YAFilterLikeClause>();
 	private List<YAFilterOperatorClause> listOperatorClause = new ArrayList<YAFilterOperatorClause>();
 
 	@Deprecated
@@ -116,6 +117,15 @@ public abstract class YAFilterSearch extends YAFilterBase implements Serializabl
 			searcher.getListLikeClause().add(likeCl);
 		}
 	}
+	
+	public static void setNotLikeClause(String value, String nameField, YAFilterSearch searcher) {
+		if (StringUtils.isNotBlank(value)) {
+			YAFilterLikeClause likeCl = new YAFilterLikeClause();
+			likeCl.setNameField(nameField);
+			likeCl.setValue("%" + value + "%");
+			searcher.getListNotLikeClause().add(likeCl);
+		}
+	}	
 
 	public static void setBetweenClause(Object valueFrom, Object valueTo, String nameField, YAFilterSearch searcher,
 			Class<?> typeData) {
@@ -167,6 +177,13 @@ public abstract class YAFilterSearch extends YAFilterBase implements Serializabl
 			else
 				result.getListLike().add(_serializeBusinessClause(cLike));
 		}
+		
+		for (YAFilterLikeClause cLike : searcher.getListNotLikeClause()) {
+			if (cLike.isInsensitive())
+				result.getListNotLikeInsensitive().add(_serializeBusinessClause(cLike));
+			else
+				result.getListNotLike().add(_serializeBusinessClause(cLike));
+		}		
 
 		for (YAFilterOperatorClause cOper : searcher.getListOperatorClause()) {
 			Map<String, Object> serOper = _serializeBusinessClause(cOper);
@@ -478,5 +495,13 @@ public abstract class YAFilterSearch extends YAFilterBase implements Serializabl
 
 	public void setNot(boolean not) {
 		this.not = not;
+	}
+
+	public List<YAFilterLikeClause> getListNotLikeClause() {
+		return listNotLikeClause;
+	}
+
+	public void setListNotLikeClause(List<YAFilterLikeClause> listNotLikeClause) {
+		this.listNotLikeClause = listNotLikeClause;
 	}
 }
