@@ -1,6 +1,9 @@
 package it.alessandromodica.product.persistence.repo;
 
 import java.io.Serializable;
+import java.math.BigDecimal;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.Iterator;
@@ -170,7 +173,7 @@ public class BaseRepository<T, JOIN> implements IRepositoryQueries<T, JOIN>, IRe
 		List<Selection> projections = new ArrayList<Selection>();
 		for (String cField : fieldsprojection) {
 			try {
-				projections.add(root.get(cField));
+				projections.add(getPathByRoot(root, cField));
 			} catch (Exception e) {
 				continue;
 			}
@@ -218,7 +221,7 @@ public class BaseRepository<T, JOIN> implements IRepositoryQueries<T, JOIN>, IRe
 
 		for (String cBool : serializeCriteria.getListValueBool().keySet()) {
 
-			predicates.add(builder.equal(setFieldRoot(root, cBool), serializeCriteria.getListValueBool().get(cBool)));
+			predicates.add(builder.equal(getPathByRoot(root, cBool), serializeCriteria.getListValueBool().get(cBool)));
 		}
 
 		for (Map<String, Object> cLike : serializeCriteria.getListLike()) {
@@ -231,7 +234,7 @@ public class BaseRepository<T, JOIN> implements IRepositoryQueries<T, JOIN>, IRe
 		for (Map<String, Object> cInsLike : serializeCriteria.getListLikeInsensitive()) {
 			String field = cInsLike.get(YAFilterSearch.NAME_FIELD).toString();
 			Object value = cInsLike.get(YAFilterSearch.VALUE_FIELD);
-			Expression<String> rootField = root.get(field);
+			Expression rootField = getPathByRoot(root, field);
 			predicates.add(builder.like(builder.lower(rootField), value.toString().toLowerCase()));
 		}
 
@@ -245,7 +248,7 @@ public class BaseRepository<T, JOIN> implements IRepositoryQueries<T, JOIN>, IRe
 		for (Map<String, Object> cInsLike : serializeCriteria.getListNotLikeInsensitive()) {
 			String field = cInsLike.get(YAFilterSearch.NAME_FIELD).toString();
 			Object value = cInsLike.get(YAFilterSearch.VALUE_FIELD);
-			Expression<String> rootField = root.get(field);
+			Expression rootField = getPathByRoot(root, field);
 			predicates.add(builder.notLike(builder.lower(rootField), value.toString().toLowerCase()));
 		}
 
@@ -255,7 +258,7 @@ public class BaseRepository<T, JOIN> implements IRepositoryQueries<T, JOIN>, IRe
 			Class<?> typeData = (Class) cBT.get(YAFilterSearch.TYPE_DATA);
 			String field = cBT.get(YAFilterSearch.NAME_FIELD).toString();
 
-			Expression rootField = setFieldRoot(root, field);
+			Expression rootField = getPathByRoot(root, field);
 			Object valueTo = null;
 			Object valueFrom = null;
 			if (cBT.get(YAFilterSearch.VALUE_TO) != null)
@@ -306,7 +309,7 @@ public class BaseRepository<T, JOIN> implements IRepositoryQueries<T, JOIN>, IRe
 		// XXX: la lista dei valori non vuoti converge con quelli non nulli.
 		// valutare se e' corretto il giro
 		for (String cIsNotWS : serializeCriteria.getListIsNotEmpty()) {
-			predicates.add(builder.isNotNull(setFieldRoot(root, cIsNotWS)));
+			predicates.add(builder.isNotNull(getPathByRoot(root, cIsNotWS)));
 		}
 
 		for (String cIsZero : serializeCriteria.getListIsZero()) {
@@ -344,32 +347,32 @@ public class BaseRepository<T, JOIN> implements IRepositoryQueries<T, JOIN>, IRe
 	}
 
 	private Predicate createEqual(CriteriaBuilder builder, Root<T> root, String fieldHB, Object valueKey) {
-		Predicate equalpred = builder.equal(setFieldRoot(root, fieldHB), valueKey);
+		Predicate equalpred = builder.equal(getPathByRoot(root, fieldHB), valueKey);
 		return equalpred;
 	}
 
 	private Predicate createIsZero(CriteriaBuilder builder, Root<T> root, String cIsZero) {
-		Predicate equalIsZero = builder.equal(setFieldRoot(root, cIsZero), 0);
+		Predicate equalIsZero = builder.equal(getPathByRoot(root, cIsZero), 0);
 		return equalIsZero;
 	}
 
 	private Predicate createIsNotNull(CriteriaBuilder builder, Root<T> root, String cIsNotNull) {
-		Predicate notNullpred = builder.isNotNull(setFieldRoot(root, cIsNotNull));
+		Predicate notNullpred = builder.isNotNull(getPathByRoot(root, cIsNotNull));
 		return notNullpred;
 	}
 
 	private Predicate createIsNull(CriteriaBuilder builder, Root<T> root, String cIsNull) {
-		Predicate nullpred = builder.isNull(setFieldRoot(root, cIsNull));
+		Predicate nullpred = builder.isNull(getPathByRoot(root, cIsNull));
 		return nullpred;
 	}
 
 	private Predicate createNotIn(Root<T> root, String cNotIn, Object[] listNotIn) {
-		Predicate notpred = setFieldRoot(root, cNotIn).in(listNotIn).not();
+		Predicate notpred = getPathByRoot(root, cNotIn).in(listNotIn).not();
 		return notpred;
 	}
 
 	private Predicate createIn(Root<T> root, String cIn, Object[] listIn) {
-		Predicate inpred = setFieldRoot(root, cIn).in(listIn);
+		Predicate inpred = getPathByRoot(root, cIn).in(listIn);
 		return inpred;
 	}
 
@@ -379,14 +382,40 @@ public class BaseRepository<T, JOIN> implements IRepositoryQueries<T, JOIN>, IRe
 		if (typeData != null) {
 			OperatorClause buildPredicato = null;
 
-			if (typeData.getName().contains("Date")) {
+			String fullName = typeData.getName();
+			String[] splitField = fullName.split("\\.");
+			String name = splitField[splitField.length - 1];
+
+			switch (name) {
+			// Deprecato
+			case "Date":
 				buildPredicato = new OperatorClause<Date>();
-			} else if (typeData.getName().contains("Integer")) {
+				break;
+			case "LocalDate":
+				buildPredicato = new OperatorClause<LocalDate>();
+				break;
+			case "LocalDateTime":
+				buildPredicato = new OperatorClause<LocalDateTime>();
+				break;
+			case "Integer":
 				buildPredicato = new OperatorClause<Integer>();
-			} else if (typeData.getName().contains("Double")) {
+				break;
+			case "Long":
+				buildPredicato = new OperatorClause<Long>();
+				break;
+			case "Double":
 				buildPredicato = new OperatorClause<Double>();
-			} else
+				break;
+			case "BigDecimal":
+				buildPredicato = new OperatorClause<BigDecimal>();
+				break;
+			case "Character":
+				buildPredicato = new OperatorClause<Character>();
+				break;
+
+			default:
 				throw new RepositoryException("Entita' di clausola operatore non riconosciuta " + typeData.getName());
+			}
 
 			predicato = buildPredicato.buildPredicato(builder, cOper, root);
 		}
@@ -394,13 +423,13 @@ public class BaseRepository<T, JOIN> implements IRepositoryQueries<T, JOIN>, IRe
 	}
 
 	private Predicate createLike(CriteriaBuilder builder, Root<T> root, String field, Object value) {
-		Expression<String> rootField = root.get(field);
+		Expression rootField = getPathByRoot(root, field);
 		Predicate likepred = builder.like(rootField, value.toString());
 		return likepred;
 	}
 
 	private Predicate createNotLike(CriteriaBuilder builder, Root<T> root, String field, Object value) {
-		Expression<String> rootField = root.get(field);
+		Expression rootField = getPathByRoot(root, field);
 		Predicate likepred = builder.notLike(rootField, value.toString());
 		return likepred;
 	}
@@ -435,7 +464,10 @@ public class BaseRepository<T, JOIN> implements IRepositoryQueries<T, JOIN>, IRe
 		}
 	}
 
-	private Path<Object> setFieldRoot(Root root, String field) {
+	/**
+	 * Risolve il path di una entita mappata su un model entity
+	 */
+	public Path<Object> getPathByRoot(Root root, String field) {
 
 		String[] splitField = field.split("\\.");
 		Path<Object> result = null;
@@ -446,11 +478,10 @@ public class BaseRepository<T, JOIN> implements IRepositoryQueries<T, JOIN>, IRe
 			for (int i = 1; i < splitField.length; i++) {
 				result = result.get(splitField[i]);
 			}
-
 		}
 
 		return result;
-	}
+	}	
 
 	private Path<Object> setFieldJoin(Join<T, JOIN> join, String field) {
 
@@ -477,7 +508,7 @@ public class BaseRepository<T, JOIN> implements IRepositoryQueries<T, JOIN>, IRe
 			String field = cOper.get(YAFilterSearch.NAME_FIELD).toString();
 			Operators operatore = Enum.valueOf(Operators.class, cOper.get("_operatore").toString());
 
-			Expression<K> rootField = root.get(field);
+			Expression rootField = getPathByRoot(root, field);
 			K value = (K) cOper.get(YAFilterSearch.VALUE_FIELD);
 
 			switch (operatore) {
@@ -661,7 +692,6 @@ public class BaseRepository<T, JOIN> implements IRepositoryQueries<T, JOIN>, IRe
 	}
 
 	private T retrieveById(Object objId, EntityManager em) throws RepositoryException {
-
 		T obj = null;
 		try {
 			obj = (T) em.find(classEntity, objId);
@@ -754,14 +784,17 @@ public class BaseRepository<T, JOIN> implements IRepositoryQueries<T, JOIN>, IRe
 		case singledefault:
 			checkStrategy = result.size() == 0 || result.size() == 1;
 			isSingle = true;
+			break;
 		case firstdefault:
 			checkStrategy = result.size() == 0 || result.size() > 0;
 			break;
 		case single:
 			checkStrategy = result.size() == 1;
 			isSingle = true;
+			break;
 		case first:
 			checkStrategy = result.size() > 0;
+			break;
 		default:
 			break;
 		}
@@ -847,7 +880,6 @@ public class BaseRepository<T, JOIN> implements IRepositoryQueries<T, JOIN>, IRe
 		}
 	}
 
-	@Deprecated
 	public Number getMax(String nameField, EntityManager em) throws RepositoryException {
 
 		Number result = retrieveMax(nameField, em);
@@ -860,7 +892,7 @@ public class BaseRepository<T, JOIN> implements IRepositoryQueries<T, JOIN>, IRe
 
 		CriteriaQuery<Integer> criteriaQuery = builder.createQuery(Integer.class);
 		Root<T> classRoot = criteriaQuery.from(classEntity);
-		criteriaQuery.select(builder.max(setFieldRoot(classRoot, nameField).as(Integer.class)));
+		criteriaQuery.select(builder.max(getPathByRoot(classRoot, nameField).as(Integer.class)));
 		Number result = em.createQuery(criteriaQuery).getSingleResult();
 		return result;
 	}
