@@ -15,5 +15,7 @@ public interface IRepositoryCommands<T, JOIN> {
 	public void update(T obj) throws RepositoryException;
 	
 	public void executeTransaction(IBulkTransaction bulkoperation) throws RepositoryException;
+	
+	public void flush();
 }
 

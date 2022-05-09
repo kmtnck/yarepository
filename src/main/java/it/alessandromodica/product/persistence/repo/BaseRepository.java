@@ -69,6 +69,47 @@ public class BaseRepository<T, JOIN> implements IRepositoryQueries<T, JOIN>, IRe
 
 	protected String nameClass;
 
+	
+	public void flush() {
+		em.flush();
+	}
+
+	/**
+	 * Override nativa repository
+	 * 
+	 */
+	public Query createQuery(CriteriaQuery criteria) {
+		return em.createQuery(criteria);
+	}
+	
+	/**
+	 * Crea una query in formato sql nativo
+	 * 
+	 * @param sql
+	 * @return
+	 */
+	public Query createNativeQuery(String sql) {
+		return em.createNativeQuery(sql);
+	}
+
+	public Query createNativeQuery(String sql, Class<?> resultclass) {
+		return em.createNativeQuery(sql, resultclass);
+	}
+
+	public Query createNativeQuery(String sql, String resultSetMapping) {
+		return em.createNativeQuery(sql, resultSetMapping);
+	}
+
+	/**
+	 * Crea una namequery
+	 * 
+	 * @param namequery
+	 * @return
+	 */
+	public Query createNamedQuery(String namequery) {
+		return em.createNamedQuery(namequery);
+	}
+	
 	public void executeTransaction(IBulkTransaction bulkoperation) throws RepositoryException {
 		try {
 
