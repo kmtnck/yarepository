@@ -74,7 +74,7 @@ public abstract class YAFilterSearch extends YAFilterBase implements Serializabl
 	private List<String> listIsNotNull = new ArrayList<String>();
 	private List<String> listIsNotEmpty = new ArrayList<String>();
 	private List<String> listIsZero = new ArrayList<String>();
-	private List<YAFilterSearch> listOrClause = new ArrayList<YAFilterSearch>();
+	private List<YAFilterSearchApp> listOrClause = new ArrayList<YAFilterSearchApp>();
 	private Map<String, Boolean> listValueBool = new HashMap<String, Boolean>();
 	private Map<String, Object[]> listIn = new HashMap<String, Object[]>();
 	private Map<String, Object[]> listNotIn = new HashMap<String, Object[]>();
@@ -425,11 +425,11 @@ public abstract class YAFilterSearch extends YAFilterBase implements Serializabl
 		this.listIsZero = listIsZero;
 	}
 
-	public List<YAFilterSearch> getListOrClause() {
+	public List<YAFilterSearchApp> getListOrClause() {
 		return listOrClause;
 	}
 
-	public void setListOrClause(List<YAFilterSearch> listOrClause) {
+	public void setListOrClause(List<YAFilterSearchApp> listOrClause) {
 		this.listOrClause = listOrClause;
 	}
 
