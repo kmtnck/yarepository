@@ -33,6 +33,9 @@ public abstract class YAFilterSearch extends YAFilterBase implements Serializabl
 	 */
 	private static final long serialVersionUID = -3897039654760798485L;
 
+	public static final String PROPERTY_1 = "property1";
+	public static final String PROPERTY_2 = "property2";
+	
 	public static final String NAME_FIELD = "nameField";
 	public static final String TYPE_DATA = "typeData";
 	public static final String VALUE_FIELD = "value";
@@ -62,6 +65,7 @@ public abstract class YAFilterSearch extends YAFilterBase implements Serializabl
 	private List<YAFilterLikeClause> listLikeClause = new ArrayList<YAFilterLikeClause>();
 	private List<YAFilterLikeClause> listNotLikeClause = new ArrayList<YAFilterLikeClause>();
 	private List<YAFilterOperatorClause> listOperatorClause = new ArrayList<YAFilterOperatorClause>();
+	private List<YAFilterOperatorProperty> listOperatorProperty = new ArrayList<YAFilterOperatorProperty>();
 
 	@Deprecated
 	private boolean descendent = false;
@@ -138,6 +142,16 @@ public abstract class YAFilterSearch extends YAFilterBase implements Serializabl
 			searcher.getListBetweenClause().add(btw);
 		}
 	}
+	
+	public static void setFilterOperatorProperty(String property1, String property2, YAFilterOperatorProperty.Operators operator, Class<?> typeData, YAFilterSearch searcher)
+	{
+		YAFilterOperatorProperty filter = new YAFilterOperatorProperty();
+		filter.setProperty1(property1);
+		filter.setProperty2(property2);
+		filter.setTypeData(typeData);
+		filter.setOperatore(operator.name());
+		searcher.getListOperatorProperty().add(filter);
+	}	
 
 	public YAFilterSerializeCriteria getSerialized() throws RepositoryException {
 		return _buildItemClause(this);
@@ -194,6 +208,11 @@ public abstract class YAFilterSearch extends YAFilterBase implements Serializabl
 
 			result.getListOperator().add(serOper);
 		}
+		
+		for (YAFilterOperatorProperty cOper : searcher.getListOperatorProperty()) {
+			Map<String, Object> serOper = _serializeBusinessClause(cOper);
+			result.getListOperatorProperty().add(serOper);
+		}		
 
 		for (String cIsNull : searcher.getListIsNull()) {
 			result.getListIsNull().add(cIsNull);
@@ -503,5 +522,13 @@ public abstract class YAFilterSearch extends YAFilterBase implements Serializabl
 
 	public void setListNotLikeClause(List<YAFilterLikeClause> listNotLikeClause) {
 		this.listNotLikeClause = listNotLikeClause;
+	}
+
+	public List<YAFilterOperatorProperty> getListOperatorProperty() {
+		return listOperatorProperty;
+	}
+
+	public void setListOperatorProperty(List<YAFilterOperatorProperty> listOperatorProperty) {
+		this.listOperatorProperty = listOperatorProperty;
 	}
 }

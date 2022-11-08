@@ -36,6 +36,7 @@ public class YAFilterSerializeCriteria implements Serializable  {
 	private List<Map<String, Object>> listNotLikeInsensitive = new ArrayList<Map<String, Object>>();
 	
 	private List<Map<String, Object>> listOperator = new ArrayList<Map<String, Object>>();
+	private List<Map<String, Object>> listOperatorProperty = new ArrayList<Map<String, Object>>();
 	private List<String> listOrderBy = new ArrayList<String>();
 	private List<String> listIsNull = new ArrayList<String>();
 	private List<String> listIsNotNull = new ArrayList<String>();
@@ -253,5 +254,13 @@ public class YAFilterSerializeCriteria implements Serializable  {
 
 	public void setListNotLikeInsensitive(List<Map<String, Object>> listNotLikeInsensitive) {
 		this.listNotLikeInsensitive = listNotLikeInsensitive;
+	}
+
+	public List<Map<String, Object>> getListOperatorProperty() {
+		return listOperatorProperty;
+	}
+
+	public void setListOperatorProperty(List<Map<String, Object>> listOperatorProperty) {
+		this.listOperatorProperty = listOperatorProperty;
 	}
 }

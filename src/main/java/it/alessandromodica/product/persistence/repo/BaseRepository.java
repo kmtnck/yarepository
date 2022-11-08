@@ -34,6 +34,7 @@ import it.alessandromodica.product.persistence.interfaces.IRepositoryCommands;
 import it.alessandromodica.product.persistence.interfaces.IRepositoryQueries;
 import it.alessandromodica.product.persistence.searcher.YAFilterJoinClause;
 import it.alessandromodica.product.persistence.searcher.YAFilterOperatorClause.Operators;
+import it.alessandromodica.product.persistence.searcher.YAFilterOperatorProperty;
 import it.alessandromodica.product.persistence.searcher.YAFilterSearch;
 import it.alessandromodica.product.persistence.searcher.YAFilterSerializeCriteria;
 
@@ -319,6 +320,13 @@ public class BaseRepository<T, JOIN> implements IRepositoryQueries<T, JOIN>, IRe
 
 			predicates.add(predicato);
 		}
+		
+		for (Map<String, Object> cOper : serializeCriteria.getListOperatorProperty()) {
+
+			Class<?> typeData = (Class) cOper.get(YAFilterSearch.TYPE_DATA);
+			Predicate predicato = createOperatorProperty(builder, root, cOper, typeData);
+			predicates.add(predicato);
+		}		
 
 		for (String cIn : serializeCriteria.getListIn().keySet()) {
 
@@ -462,6 +470,51 @@ public class BaseRepository<T, JOIN> implements IRepositoryQueries<T, JOIN>, IRe
 		}
 		return predicato;
 	}
+	
+	public Predicate createOperatorProperty(CriteriaBuilder builder, Root<T> root, Map<String, Object> cOper,
+			Class<?> typeData) throws RepositoryException {
+		Predicate predicato = null;
+		if (typeData != null) {
+			OperatorProperty buildPredicato = null;
+
+			String fullName = typeData.getName();
+			String[] splitField = fullName.split("\\.");
+			String name = splitField[splitField.length - 1];
+
+			switch (name) {
+			// Deprecato
+			case "Date":
+				buildPredicato = new OperatorProperty<Date>();
+				break;
+			case "LocalDate":
+				buildPredicato = new OperatorProperty<LocalDate>();
+				break;
+			case "LocalDateTime":
+				buildPredicato = new OperatorProperty<LocalDateTime>();
+				break;
+			case "Integer":
+				buildPredicato = new OperatorProperty<Integer>();
+				break;
+			case "Long":
+				buildPredicato = new OperatorProperty<Long>();
+				break;
+			case "Double":
+				buildPredicato = new OperatorProperty<Double>();
+				break;
+			case "BigDecimal":
+				buildPredicato = new OperatorProperty<BigDecimal>();
+				break;
+			case "Character":
+				buildPredicato = new OperatorProperty<Character>();
+				break;
+
+			default:
+				throw new RepositoryException("Entita' di clausola operatore non riconosciuta " + typeData.getName());
+			}
+			predicato = buildPredicato.buildPredicato(builder, cOper, root);
+		}
+		return predicato;
+	}	
 
 	private Predicate createLike(CriteriaBuilder builder, Root<T> root, String field, Object value) {
 		Expression rootField = getPathByRoot(root, field);
@@ -540,7 +593,8 @@ public class BaseRepository<T, JOIN> implements IRepositoryQueries<T, JOIN>, IRe
 	 *
 	 * @param <K>
 	 */
-	private class OperatorClause<K extends Comparable<? super K>> {
+	@Deprecated
+	private class OperatorClauseOLD<K extends Comparable<? super K>> {
 
 		public Predicate buildPredicato(CriteriaBuilder builder, Map<String, Object> cOper, Root<T> root) {
 
@@ -576,6 +630,108 @@ public class BaseRepository<T, JOIN> implements IRepositoryQueries<T, JOIN>, IRe
 		}
 
 	}
+	
+	private class OperatorClause<K extends Comparable<? super K>> extends OperatorCommon {
+
+		public Predicate buildPredicato(CriteriaBuilder builder, Map<String, Object> cOper, Root<T> root) {
+
+			Predicate predicato = null;
+			Operators operatore = Enum.valueOf(Operators.class, cOper.get("operatore").toString());
+			Expression<K> rootField = getExpressionProperty(root, cOper.get(YAFilterSearch.NAME_FIELD).toString());
+
+			K value = (K) cOper.get(YAFilterSearch.VALUE_FIELD);
+
+			switch (operatore) {
+			case minusequals:
+				predicato = builder.lessThanOrEqualTo(rootField, value);
+				break;
+			case minus:
+				predicato = builder.lessThan(rootField, value);
+				break;
+			case majorequals:
+				predicato = builder.greaterThanOrEqualTo(rootField, value);
+				break;
+			case major:
+				predicato = builder.greaterThan(rootField, value);
+				break;
+			case disequals:
+				predicato = builder.notEqual(rootField, value);
+				break;
+			default:
+				break;
+			}
+
+			return predicato;
+		}
+
+	}	
+	
+	private class OperatorProperty<K extends Comparable<? super K>> extends OperatorCommon {
+
+		public Predicate buildPredicato(CriteriaBuilder builder, Map<String, Object> cOper, Root<T> root) {
+
+			Predicate predicato = null;
+			YAFilterOperatorProperty.Operators operatore = Enum.valueOf(YAFilterOperatorProperty.Operators.class,
+					cOper.get("operatore").toString());
+
+			Expression<K> resolvePathField1 = getExpressionProperty(root,
+					cOper.get(YAFilterSearch.PROPERTY_1).toString());
+			Expression<K> resolvePathField2 = getExpressionProperty(root,
+					cOper.get(YAFilterSearch.PROPERTY_2).toString());
+
+			switch (operatore) {
+			case equals:
+				predicato = builder.equal(resolvePathField1, resolvePathField2);
+				break;
+			case minusequals:
+				predicato = builder.lessThanOrEqualTo(resolvePathField1, resolvePathField2);
+				break;
+			case minus:
+				predicato = builder.lessThan(resolvePathField1, resolvePathField2);
+				break;
+			case majorequals:
+				predicato = builder.greaterThanOrEqualTo(resolvePathField1, resolvePathField2);
+				break;
+			case major:
+				predicato = builder.greaterThan(resolvePathField1, resolvePathField2);
+				break;
+			case disequals:
+				predicato = builder.notEqual(resolvePathField1, resolvePathField2);
+				break;
+			default:
+				break;
+			}
+
+			return predicato;
+		}
+	}	
+	
+
+	private abstract class OperatorCommon<K extends Comparable<? super K>> {
+		protected Expression<K> getExpressionProperty(Root<T> root, String field) {
+			String[] splitField = field.split("\\.");
+			Expression<K> result = resolvePath(root, splitField);
+
+			return result;
+		}
+
+		/**
+		 * @param root
+		 * @param splitField
+		 * @return
+		 */
+		protected Path<K> resolvePath(Root<T> root, String[] splitField) {
+			Path<K> resolvePathField = null;
+			resolvePathField = root.get(splitField[0]);
+			if (splitField.length > 1) {
+
+				for (int i = 1; i < splitField.length; i++) {
+					resolvePathField = resolvePathField.get(splitField[i]);
+				}
+			}
+			return resolvePathField;
+		}
+	}	
 
 	public List<T> getAll() throws RepositoryException {
 		try {
