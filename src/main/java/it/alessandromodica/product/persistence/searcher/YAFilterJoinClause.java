@@ -1,6 +1,6 @@
 package it.alessandromodica.product.persistence.searcher;
 
-public class YAFilterJoinClause<Q> {
+public class YAFilterJoinClause {
 
 	
 	Object valueToJoin;

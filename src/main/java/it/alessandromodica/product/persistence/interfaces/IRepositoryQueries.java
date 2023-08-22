@@ -7,7 +7,7 @@ import javax.persistence.criteria.CriteriaQuery;
 import it.alessandromodica.product.persistence.exceptions.RepositoryException;
 import it.alessandromodica.product.persistence.searcher.YAFilterSerializeCriteria;
 
-public interface IRepositoryQueries<T, JOIN> {
+public interface IRepositoryQueries<T> {
 
 	public T getById(Object objId, Class<T> classEntity) throws RepositoryException;
 	

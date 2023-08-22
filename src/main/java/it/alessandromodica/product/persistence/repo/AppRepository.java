@@ -1,6 +1,10 @@
 package it.alessandromodica.product.persistence.repo;
 
 import org.apache.log4j.Logger;
+import org.springframework.stereotype.Repository;
+
+import it.alessandromodica.product.persistence.interfaces.IRepositoryCommands;
+import it.alessandromodica.product.persistence.interfaces.IRepositoryQueries;
 
 /**
  * In questa classe repository e' possibile definire tutti i metodi legacy
@@ -13,17 +17,17 @@ import org.apache.log4j.Logger;
  *
  * @param <T>
  */
-@Deprecated
-public class AppRepository<T, JOIN> extends BaseRepository<T, JOIN>  {
+//@Deprecated
+@Repository
+public class AppRepository<T> extends BaseRepository<T> implements IRepositoryQueries<T>, IRepositoryCommands<T> {
 
 	private static final Logger log = Logger.getLogger(AppRepository.class);
 
-	@Deprecated
-	public AppRepository<T, JOIN> setEntity(Class<T> classEntity) {
-		// TODO Auto-generated method stub
-		setClass(classEntity);
-		return this;
-
-	}
+	/*
+	 * @Deprecated public AppRepository<T> setEntity(Class<T> classEntity) { // TODO
+	 * Auto-generated method stub setClass(classEntity); return this;
+	 * 
+	 * }
+	 */
 
 }

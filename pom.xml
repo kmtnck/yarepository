@@ -1,6 +1,4 @@
-<project xmlns="http://maven.apache.org/POM/4.0.0"
-	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 	<artifactId>yarepository</artifactId>
 	<version>1.1.1-SNAPSHOT</version>
@@ -43,13 +41,13 @@
 			<artifactId>spring-core</artifactId>
 			<version>${spring-framework.version}</version>
 		</dependency>
-		
+
 		<!-- per i test . i junit si pongono da client , applicazioni, e questo modulo permette di simulare contesti springboot -->
- 		<dependency>
+		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-data-jpa</artifactId>
 			<version>${spring-boot.version}</version>
-		</dependency> 
+		</dependency>
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-test</artifactId>
@@ -62,7 +60,7 @@
 				</exclusion>
 			</exclusions>
 		</dependency>
-				
+
 		<!-- driver accesso database commentato da git. questo connector soffre di un bug di vulnerabilita -->
 		<!-- 
 		Scommentare solo in locale, e in git lasciare commentato.
@@ -77,29 +75,34 @@
 			<groupId>org.hsqldb</groupId>
 			<artifactId>hsqldb</artifactId>
 			<version>${hsqldb.version}</version>
+			<scope>test</scope>
 		</dependency>
 		<!-- https://mvnrepository.com/artifact/org.hsqldb/sqltool -->
 		<dependency>
 			<groupId>org.hsqldb</groupId>
 			<artifactId>sqltool</artifactId>
 			<version>${hsqldb.version}</version>
+			<scope>test</scope>
 		</dependency>
-		
+
+		<!--
 		<dependency>
 			<groupId>org.slf4j</groupId>
 			<artifactId>slf4j-api</artifactId>
 			<version>${slf4j.version}</version>
 			<scope>compile</scope>
 		</dependency>
-		<dependency>
-			<groupId>org.slf4j</groupId>
-			<artifactId>slf4j-log4j12</artifactId>
-			<version>1.7.12</version>
-		</dependency>
+
 		<dependency>
 			<groupId>ch.qos.logback</groupId>
 			<artifactId>logback-classic</artifactId>
 			<version>${logback.version}</version>
+		</dependency>
+		-->
+		<dependency>
+			<groupId>org.slf4j</groupId>
+			<artifactId>slf4j-log4j12</artifactId>
+			<version>1.7.12</version>
 		</dependency>
 
 		<dependency>
@@ -151,11 +154,13 @@
 			<artifactId>hibernate-ehcache</artifactId>
 			<version>${hibernate.version}</version>
 		</dependency>
+		<!--
 		<dependency>
 			<groupId>org.hibernate</groupId>
 			<artifactId>hibernate-c3p0</artifactId>
 			<version>${hibernate.version}</version>
 		</dependency>
+		-->
 
 		<dependency>
 			<groupId>org.javassist</groupId>
