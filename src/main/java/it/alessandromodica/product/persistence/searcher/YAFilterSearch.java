@@ -114,13 +114,17 @@ public abstract class YAFilterSearch extends YAFilterBase implements Serializabl
 	}
 
 	public static void setLikeClause(String value, String nameField, YAFilterSearch searcher) {
+		setLikeClause(value, nameField, false, searcher);
+	}
+	
+	public static void setLikeClause(String value, String nameField, boolean insensitive, YAFilterSearch searcher) {
 		if (StringUtils.isNotBlank(value)) {
 			YAFilterLikeClause likeCl = new YAFilterLikeClause();
 			likeCl.setNameField(nameField);
 			likeCl.setValue("%" + value + "%");
 			searcher.getListLikeClause().add(likeCl);
 		}
-	}
+	}	
 	
 	public static void setNotLikeClause(String value, String nameField, YAFilterSearch searcher) {
 		if (StringUtils.isNotBlank(value)) {
