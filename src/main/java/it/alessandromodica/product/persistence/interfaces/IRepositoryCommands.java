@@ -2,7 +2,7 @@ package it.alessandromodica.product.persistence.interfaces;
 
 import it.alessandromodica.product.persistence.exceptions.RepositoryException;
 
-public interface IRepositoryCommands<T, JOIN> {
+public interface IRepositoryCommands<T> {
 
 	public void add(T obj) throws RepositoryException;
 

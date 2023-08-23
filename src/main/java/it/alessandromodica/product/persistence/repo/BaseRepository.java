@@ -26,12 +26,9 @@ import javax.persistence.criteria.Selection;
 import javax.transaction.Transactional;
 
 import org.apache.log4j.Logger;
-import org.springframework.stereotype.Repository;
 
 import it.alessandromodica.product.persistence.exceptions.RepositoryException;
 import it.alessandromodica.product.persistence.interfaces.IBulkTransaction;
-import it.alessandromodica.product.persistence.interfaces.IRepositoryCommands;
-import it.alessandromodica.product.persistence.interfaces.IRepositoryQueries;
 import it.alessandromodica.product.persistence.searcher.YAFilterJoinClause;
 import it.alessandromodica.product.persistence.searcher.YAFilterOperatorClause.Operators;
 import it.alessandromodica.product.persistence.searcher.YAFilterOperatorProperty;
@@ -50,8 +47,8 @@ import it.alessandromodica.product.persistence.searcher.YAFilterSerializeCriteri
  * @param <T>
  */
 @SuppressWarnings("unchecked")
-@Repository
-public class BaseRepository<T, JOIN> implements IRepositoryQueries<T, JOIN>, IRepositoryCommands<T, JOIN> {
+//@Repository
+public class BaseRepository<T> /*implements IRepositoryQueries<T>, IRepositoryCommands<T>*/ {
 
 	@PersistenceContext
 	protected EntityManager em;
@@ -235,7 +232,7 @@ public class BaseRepository<T, JOIN> implements IRepositoryQueries<T, JOIN>, IRe
 
 		List<Predicate> predicates = new ArrayList<Predicate>(0);
 
-		for (YAFilterJoinClause<JOIN> cJoin : serializeCriteria.getListJoinClause()) {
+		for (YAFilterJoinClause cJoin : serializeCriteria.getListJoinClause()) {
 
 			// XXX: possono esserci varie modalita di join. bisogna sempre tenere in
 			// considerazione l'entity graph definito sul bean di testata
@@ -577,7 +574,7 @@ public class BaseRepository<T, JOIN> implements IRepositoryQueries<T, JOIN>, IRe
 		return result;
 	}	
 
-	private Path<Object> setFieldJoin(Join<T, JOIN> join, String field) {
+	private Path<Object> setFieldJoin(Join<T, Object> join, String field) {
 
 		String[] splitField = field.split("\\.");
 		if (splitField.length == 2) {
