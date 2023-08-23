@@ -48,7 +48,7 @@ import it.alessandromodica.product.persistence.searcher.YAFilterSerializeCriteri
  */
 @SuppressWarnings("unchecked")
 //@Repository
-public class BaseRepository<T> /*implements IRepositoryQueries<T>, IRepositoryCommands<T>*/ {
+public abstract class BaseRepository<T> /*implements IRepositoryQueries<T>, IRepositoryCommands<T>*/ {
 
 	@PersistenceContext
 	protected EntityManager em;
