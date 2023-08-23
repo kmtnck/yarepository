@@ -15,6 +15,8 @@ public interface IRepositoryQueries<T> {
 
 	public List<T> search(YAFilterSerializeCriteria serializeCriteria) throws RepositoryException;
 
+	public List<T> getAll() throws RepositoryException;
+	
 	public T getSingle(CriteriaQuery<T> criteria) throws RepositoryException ;
 	
 	public T getSingle(YAFilterSerializeCriteria serializeCriteria) throws RepositoryException;
