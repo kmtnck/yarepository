@@ -14,25 +14,28 @@ import org.apache.log4j.Logger;
 
 import it.alessandromodica.product.persistence.exceptions.RepositoryException;
 import it.alessandromodica.product.persistence.interfaces.IBulkTransaction;
-import it.alessandromodica.product.persistence.searcher.YAFilterSerializeCriteria;
 
 /**
- * Classe astratta in cui sono raccolte le implementazioni standard per
- * l'accesso al database. Viene ereditata da tutte le classi repository
- * implementate per l'applicazione corrente. Di solito e' sufficiente un solo
- * repository, ma potrebbero esserne implementati piu di uno a seconda le
- * esigenze
+ * 
+ * Repository base in cui sono esposte basilari crud in scrittura e update. Se
+ * si utilizza springboot o simili è preferibile delegare a repository interface
+ * ad hoc le operazioni di scrittura.
+ * 
+ * Il vero core business e' fornito dalla YaQueryCompose, la quale espone le
+ * funzionalità di ricerca tramite il searcherpp.
+ * 
+ * Spetta poi al chiamante configurare gli swagger e gli endrest frontend per
+ * gestire l'oggetto searcher nel modo migliore possibile.
  * 
  * @author Alessandro
  *
  * @param <T>
  */
 @SuppressWarnings("unchecked")
-//@Repository
-public abstract class BaseRepository<T> extends YaQueryCompose<T> /*implements IRepositoryQueries<T>, IRepositoryCommands<T>*/ {
+public abstract class BaseRepository<T> extends YaQueryCompose<T> {
 
 	private static final Logger log = Logger.getLogger(BaseRepository.class);
-	
+
 	public void flush() {
 		em.flush();
 	}
@@ -44,7 +47,7 @@ public abstract class BaseRepository<T> extends YaQueryCompose<T> /*implements I
 	public Query createQuery(CriteriaQuery<?> criteria) {
 		return em.createQuery(criteria);
 	}
-	
+
 	/**
 	 * Crea una query in formato sql nativo
 	 * 
@@ -72,7 +75,7 @@ public abstract class BaseRepository<T> extends YaQueryCompose<T> /*implements I
 	public Query createNamedQuery(String namequery) {
 		return em.createNamedQuery(namequery);
 	}
-	
+
 	public void executeTransaction(IBulkTransaction bulkoperation) throws RepositoryException {
 		try {
 
@@ -251,7 +254,7 @@ public abstract class BaseRepository<T> extends YaQueryCompose<T> /*implements I
 
 		}
 	}
-	
+
 	public T getSingle(CriteriaQuery<T> criteria) throws RepositoryException {
 		return getRetrieve(em.createQuery(criteria), UniqueStrategy.single);
 	}
@@ -268,5 +271,4 @@ public abstract class BaseRepository<T> extends YaQueryCompose<T> /*implements I
 		return getRetrieve(em.createQuery(criteria), UniqueStrategy.firstdefault);
 	}
 
-	
 }
