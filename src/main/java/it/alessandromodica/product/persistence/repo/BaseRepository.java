@@ -256,24 +256,12 @@ public abstract class BaseRepository<T> extends YaQueryCompose<T> /*implements I
 		return getRetrieve(em.createQuery(criteria), UniqueStrategy.single);
 	}
 
-	public T getSingle(YAFilterSerializeCriteria serializeCriteria) throws RepositoryException {
-		return (T) getRetrieve(buildCriteriaQuery(serializeCriteria), UniqueStrategy.single);
-	}
-
 	public T getSingleOrDefault(CriteriaQuery<T> criteria) throws RepositoryException {
 		return getRetrieve(em.createQuery(criteria), UniqueStrategy.singledefault);
 	}
 
-	public T getSingleOrDefault(YAFilterSerializeCriteria serializeCriteria) throws RepositoryException {
-		return (T) getRetrieve(buildCriteriaQuery(serializeCriteria), UniqueStrategy.singledefault);
-	}
-
 	public T getFirst(CriteriaQuery<T> criteria) throws RepositoryException {
 		return getRetrieve(em.createQuery(criteria), UniqueStrategy.first);
-	}
-
-	public T getFirst(YAFilterSerializeCriteria serializeCriteria) throws RepositoryException {
-		return (T) getRetrieve(buildCriteriaQuery(serializeCriteria), UniqueStrategy.first);
 	}
 
 	public T getFirstOrDefault(CriteriaQuery<T> criteria) throws RepositoryException {
