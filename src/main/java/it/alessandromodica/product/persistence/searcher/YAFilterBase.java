@@ -1,7 +1,8 @@
 package it.alessandromodica.product.persistence.searcher;
-
 import java.io.Serializable;
 import java.lang.reflect.Field;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
@@ -9,6 +10,7 @@ import java.util.Map;
 import org.apache.commons.lang.StringUtils;
 
 import it.alessandromodica.product.persistence.exceptions.RepositoryException;
+
 
 /**
  * Classe base del searcher usato per eseguire ricerche tramite lo strumento
@@ -65,21 +67,23 @@ public class YAFilterBase implements Serializable {
 					// XXX: sono accettati valori di tipo stringa, int, char, double, date e un
 					// generico tipo Class
 					if (value instanceof String || value instanceof Integer || value instanceof Character
-							|| value instanceof Double || value instanceof Long || value instanceof Date || (value instanceof Class<?>)) {
+							|| value instanceof Double || value instanceof Long || value instanceof Date || value instanceof LocalDate || value instanceof Boolean || (value instanceof LocalDateTime) || (value instanceof Class<?>)) {
 
 						// XXX: il dato viene castato in modo opportuno per essere inserito nella mappa
 						// result finale
-						if ((value instanceof String && !StringUtils.isBlank(value.toString()))
-								|| (value instanceof Character && !StringUtils.isBlank(value.toString()))
+						if ((value instanceof String && StringUtils.isNotBlank(value.toString()))
+								|| (value instanceof Character && StringUtils.isNotBlank(value.toString()))
 								|| (value instanceof Integer && Integer.parseInt(value.toString()) != 0)
 								|| (value instanceof Double && Double.parseDouble(value.toString()) != 0.0)
 								|| (value instanceof Long && Long.parseLong(value.toString()) != 0.0)
-								|| (value instanceof Date) || (value instanceof Class<?>)) {
+								|| (value instanceof Date) || (value instanceof LocalDate) || (value instanceof LocalDateTime) || value instanceof Boolean || (value instanceof Class<?>)) {
 
 							result.put(nameField, value);
 						}
 
 					}
+					else
+						throw new Exception(String.format("Il tipo %s del valore %s non e' supportato ",value.getClass(),value));
 				}
 			}
 

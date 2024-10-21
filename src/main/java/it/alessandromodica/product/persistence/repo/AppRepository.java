@@ -1,6 +1,5 @@
 package it.alessandromodica.product.persistence.repo;
 
-import org.apache.log4j.Logger;
 import org.springframework.stereotype.Repository;
 
 import it.alessandromodica.product.persistence.interfaces.IRepositoryCommands;
@@ -21,7 +20,7 @@ import it.alessandromodica.product.persistence.interfaces.IRepositoryQueries;
 @Repository
 public class AppRepository<T> extends BaseRepository<T> implements IRepositoryQueries<T>, IRepositoryCommands<T> {
 
-	private static final Logger log = Logger.getLogger(AppRepository.class);
+	//private static final Logger log = Logger.getLogger(AppRepository.class);
 
 	/*
 	 * @Deprecated public AppRepository<T> setEntity(Class<T> classEntity) { // TODO

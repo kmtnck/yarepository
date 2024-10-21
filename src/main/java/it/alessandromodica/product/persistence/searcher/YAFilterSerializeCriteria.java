@@ -20,6 +20,12 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class YAFilterSerializeCriteria implements Serializable  {
 
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = -2282917157007071284L;
+
+
 	private Class classEntity;
 	
 
@@ -42,15 +48,18 @@ public class YAFilterSerializeCriteria implements Serializable  {
 	private List<String> listIsNotNull = new ArrayList<String>();
 	private List<String> listIsZero = new ArrayList<String>();
 	private List<String> listIsNotEmpty = new ArrayList<String>();
+	private List<String> listLower = new ArrayList<String>();;
 	private Map<String, Boolean> listValueBool = new HashMap<String, Boolean>();
 	private List<YAFilterSerializeCriteria> listOrClause = new ArrayList<YAFilterSerializeCriteria>();
+	private List<YAFilterSerializeCriteria> listAndClause = new ArrayList<YAFilterSerializeCriteria>();
 	private Boolean descendent = false;
 	private Map<String,Boolean> mapDescendent = new HashMap<String,Boolean>();
 
 	private int maxResult;
 	private int firstResult;
 	private boolean not;
-	
+	private boolean distinct;
+
 	private List<String> listFieldsProjection = new ArrayList<String>();
 	private Map<String, Object[]> listIn = new HashMap<String, Object[]>();
 	private Map<String, Object[]> listNotIn = new HashMap<String, Object[]>();
@@ -262,5 +271,29 @@ public class YAFilterSerializeCriteria implements Serializable  {
 
 	public void setListOperatorProperty(List<Map<String, Object>> listOperatorProperty) {
 		this.listOperatorProperty = listOperatorProperty;
+	}
+
+	public List<YAFilterSerializeCriteria> getListAndClause() {
+		return listAndClause;
+	}
+
+	public void setListAndClause(List<YAFilterSerializeCriteria> listAndClause) {
+		this.listAndClause = listAndClause;
+	}
+
+	public List<String> getListLower() {
+		return listLower;
+	}
+
+	public void setListLower(List<String> listLower) {
+		this.listLower = listLower;
+	}
+
+	public boolean isDistinct() {
+		return distinct;
+	}
+
+	public void setDistinct(boolean distinct) {
+		this.distinct = distinct;
 	}
 }

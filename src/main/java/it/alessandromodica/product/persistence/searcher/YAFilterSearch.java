@@ -78,7 +78,9 @@ public abstract class YAFilterSearch extends YAFilterBase implements Serializabl
 	private List<String> listIsNotNull = new ArrayList<String>();
 	private List<String> listIsNotEmpty = new ArrayList<String>();
 	private List<String> listIsZero = new ArrayList<String>();
+	private List<String> listLower = new ArrayList<String>();;
 	private List<YAFilterSearchApp> listOrClause = new ArrayList<YAFilterSearchApp>();
+	private List<YAFilterSearchApp> listAndClause = new ArrayList<YAFilterSearchApp>();
 	private Map<String, Boolean> listValueBool = new HashMap<String, Boolean>();
 	private Map<String, Object[]> listIn = new HashMap<String, Object[]>();
 	private Map<String, Object[]> listNotIn = new HashMap<String, Object[]>();
@@ -86,7 +88,8 @@ public abstract class YAFilterSearch extends YAFilterBase implements Serializabl
 	private int maxResult;
 	private int firstResult;
 	private boolean not;
-
+	private boolean distinct;
+	
 	@Deprecated
 	public YAFilterSearch() {
 
@@ -96,13 +99,12 @@ public abstract class YAFilterSearch extends YAFilterBase implements Serializabl
 		this.classEntity = classEntity;
 	}
 
-	public static YAFilterSerializeCriteria getEmptyFilter(Class<?> classEntity)
-	{
+	public static YAFilterSerializeCriteria getEmptyFilter(Class<?> classEntity) {
 		YAFilterSerializeCriteria empty = new YAFilterSerializeCriteria();
 		empty.setClassEntity(classEntity);
 		return empty;
 	}
-	
+
 	public static void setClauseInList(String nameField, Object[] data, YAFilterSearch searcher) {
 		if (data != null && data.length > 0)
 			searcher.getListIn().put(nameField, data);
@@ -116,7 +118,7 @@ public abstract class YAFilterSearch extends YAFilterBase implements Serializabl
 	public static void setLikeClause(String value, String nameField, YAFilterSearch searcher) {
 		setLikeClause(value, nameField, false, searcher);
 	}
-	
+
 	public static void setLikeClause(String value, String nameField, boolean insensitive, YAFilterSearch searcher) {
 		if (StringUtils.isNotBlank(value)) {
 			YAFilterLikeClause likeCl = new YAFilterLikeClause();
@@ -124,8 +126,8 @@ public abstract class YAFilterSearch extends YAFilterBase implements Serializabl
 			likeCl.setValue("%" + value + "%");
 			searcher.getListLikeClause().add(likeCl);
 		}
-	}	
-	
+	}
+
 	public static void setNotLikeClause(String value, String nameField, YAFilterSearch searcher) {
 		if (StringUtils.isNotBlank(value)) {
 			YAFilterLikeClause likeCl = new YAFilterLikeClause();
@@ -133,7 +135,7 @@ public abstract class YAFilterSearch extends YAFilterBase implements Serializabl
 			likeCl.setValue("%" + value + "%");
 			searcher.getListNotLikeClause().add(likeCl);
 		}
-	}	
+	}
 
 	public static void setBetweenClause(Object valueFrom, Object valueTo, String nameField, YAFilterSearch searcher,
 			Class<?> typeData) {
@@ -146,16 +148,26 @@ public abstract class YAFilterSearch extends YAFilterBase implements Serializabl
 			searcher.getListBetweenClause().add(btw);
 		}
 	}
-	
-	public static void setFilterOperatorProperty(String property1, String property2, YAFilterOperatorProperty.Operators operator, Class<?> typeData, YAFilterSearch searcher)
-	{
+
+	public static void setFilterOperatorProperty(String property1, String property2,
+			YAFilterOperatorProperty.Operators operator, Class<?> typeData, YAFilterSearch searcher) {
 		YAFilterOperatorProperty filter = new YAFilterOperatorProperty();
 		filter.setProperty1(property1);
 		filter.setProperty2(property2);
 		filter.setTypeData(typeData);
 		filter.setOperatore(operator.name());
 		searcher.getListOperatorProperty().add(filter);
-	}	
+	}
+	
+	public static void setFilterOperatorClause(String nameField, Object value, 
+			YAFilterOperatorClause.Operators operator, Class<?> typeData, YAFilterSearch searcher) {
+		YAFilterOperatorClause filter = new YAFilterOperatorClause();
+		filter.setNameField(nameField);
+		filter.setValue(value);
+		filter.setTypeData(typeData);
+		filter.setOperatore(operator.name());
+		searcher.getListOperatorClause().add(filter);
+	}
 
 	public YAFilterSerializeCriteria getSerialized() throws RepositoryException {
 		return _buildItemClause(this);
@@ -166,6 +178,8 @@ public abstract class YAFilterSearch extends YAFilterBase implements Serializabl
 		YAFilterSerializeCriteria result = new YAFilterSerializeCriteria();
 
 		result.setNot(searcher.isNot());
+		
+		result.setDistinct(searcher.isDistinct());
 		
 		result.setClassEntity(searcher.getClassEntity());
 		// uguaglianze
@@ -195,13 +209,13 @@ public abstract class YAFilterSearch extends YAFilterBase implements Serializabl
 			else
 				result.getListLike().add(_serializeBusinessClause(cLike));
 		}
-		
+
 		for (YAFilterLikeClause cLike : searcher.getListNotLikeClause()) {
 			if (cLike.isInsensitive())
 				result.getListNotLikeInsensitive().add(_serializeBusinessClause(cLike));
 			else
 				result.getListNotLike().add(_serializeBusinessClause(cLike));
-		}		
+		}
 
 		for (YAFilterOperatorClause cOper : searcher.getListOperatorClause()) {
 			Map<String, Object> serOper = _serializeBusinessClause(cOper);
@@ -213,10 +227,15 @@ public abstract class YAFilterSearch extends YAFilterBase implements Serializabl
 			result.getListOperator().add(serOper);
 		}
 		
+		for(String cLower : searcher.getListLower())
+		{
+			result.getListLower().add(cLower);
+		}
+
 		for (YAFilterOperatorProperty cOper : searcher.getListOperatorProperty()) {
 			Map<String, Object> serOper = _serializeBusinessClause(cOper);
 			result.getListOperatorProperty().add(serOper);
-		}		
+		}
 
 		for (String cIsNull : searcher.getListIsNull()) {
 			result.getListIsNull().add(cIsNull);
@@ -266,6 +285,15 @@ public abstract class YAFilterSearch extends YAFilterBase implements Serializabl
 			YAFilterSerializeCriteria orSerialized = _buildItemClause(cOr);
 			result.getListOrClause().add(orSerialized);
 		}
+		
+		for (YAFilterSearch cAnd : searcher.getListAndClause()) {
+			/*if (cAnd.getListOrderBy().size() > 0)
+				throw new Exception(
+						"Non e' permesso impostare criteri di ordinamento in una clausola OR. Utilizzare l'istanza BOSearch principale per impostare l'oggetto ListOrderBy");
+			*/
+			YAFilterSerializeCriteria andSerialized = _buildItemClause(cAnd);
+			result.getListOrClause().add(andSerialized);
+		}		
 
 		// La strategia di esclusione field dalla projections e' includere tutti quelli
 		// non presenti in questa lista
@@ -534,5 +562,29 @@ public abstract class YAFilterSearch extends YAFilterBase implements Serializabl
 
 	public void setListOperatorProperty(List<YAFilterOperatorProperty> listOperatorProperty) {
 		this.listOperatorProperty = listOperatorProperty;
+	}
+
+	public List<YAFilterSearchApp> getListAndClause() {
+		return listAndClause;
+	}
+
+	public void setListAndClause(List<YAFilterSearchApp> listAndClause) {
+		this.listAndClause = listAndClause;
+	}
+
+	public List<String> getListLower() {
+		return listLower;
+	}
+
+	public void setListLower(List<String> listLower) {
+		this.listLower = listLower;
+	}
+
+	public boolean isDistinct() {
+		return distinct;
+	}
+
+	public void setDistinct(boolean distinct) {
+		this.distinct = distinct;
 	}
 }
