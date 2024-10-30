@@ -501,7 +501,72 @@ public abstract class YaQueryCompose<T> {
 		return likepred;
 	}
 
+	/**
+	 * Versione di creazione join rifattorizzata a step
+	 * 
+	 * a) creazione del criterio join con root, entita, tipo
+	 * b) creazione dell'expression usata con il campo da usare per la join
+	 * c) creazione del predicato join definendo l'uguaglianza usando il valore del campo
+	 * 
+	 * @param builder
+	 * @param root
+	 * @param entityToJoin
+	 * @param fieldToJoin
+	 * @param valueToJoin
+	 * @param typeJoin
+	 * @return
+	 */
 	private Predicate createJoin(CriteriaBuilder builder, Root<T> root, String entityToJoin, String fieldToJoin,
+			Object valueToJoin, Type typeJoin) {
+
+		//Predicate predJoin = null;
+		Join<T, Object> cjoin = createJoinCriteria(root, entityToJoin, typeJoin);
+			
+		Expression<Object> exp = setFieldJoin(cjoin, fieldToJoin);
+		
+		Predicate predJoin = (valueToJoin != null) ? builder.equal(exp, valueToJoin) : builder.isNull(exp);
+		cjoin.on(predJoin);  // Applica il predicato nella condizione on
+		
+		return predJoin;
+	}
+	
+	private Join<T,Object> createJoinCriteria(Root<T> root, String entityToJoin,
+			Type typeJoin) {
+		JoinType definetype = null;
+		if (typeJoin != null) {
+			switch (typeJoin) {
+			case INNER:
+				definetype = JoinType.INNER;
+				break;
+			case LEFT:
+				definetype = JoinType.LEFT;
+				break;
+			case RIGHT:
+				definetype = JoinType.RIGHT;
+				break;
+			}
+		}
+
+		//Predicate predJoin = null;
+		Join<T, Object> cjoin;
+		cjoin = root.join(entityToJoin, definetype != null ? definetype : JoinType.INNER);
+		
+		return cjoin;
+	}
+	
+	/**
+	 * Versione del create join monolitico
+	 * 
+	 * @param builder
+	 * @param root
+	 * @param entityToJoin
+	 * @param fieldToJoin
+	 * @param valueToJoin
+	 * @param typeJoin
+	 * @return
+	 */
+	@Deprecated
+	private Predicate createJoinOld(CriteriaBuilder builder, Root<T> root, String entityToJoin, String fieldToJoin,
 			Object valueToJoin, Type typeJoin) {
 		JoinType definetype = null;
 		if (typeJoin != null) {
